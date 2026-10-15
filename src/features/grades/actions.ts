@@ -2,7 +2,6 @@
 
 import { revalidatePath } from 'next/cache'
 import { requireAdminEmail } from '@/lib/auth'
-import { gradeSchema } from './schemas'
 import { gradeQueries } from './queries'
 import * as xlsx from 'xlsx'
 import { z } from 'zod'
@@ -59,7 +58,7 @@ export async function uploadGradesAction(formData: FormData) {
           if (uh3 !== undefined) { total += uh3; count++ }
           if (uas !== undefined) { total += uas; count++ }
 
-          const score = count > 0 ? Number((total / 4).toFixed(2)) : 0
+          const score = count > 0 ? Number((total / count).toFixed(2)) : 0
 
           recordsToSave.push({
             studentId,

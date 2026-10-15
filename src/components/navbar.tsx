@@ -141,7 +141,6 @@ export function Navbar() {
               const isActive = item.href
                 ? pathname === item.href
                 : item.children?.some((child) => pathname === child.href);
-              const Icon = item.icon;
               let itemClass = "group relative flex items-center gap-2 px-3 xl:px-4 py-2.5 rounded-xl text-[14px] xl:text-[15px] font-semibold transition-all duration-300";
 
               if (isActive) {
@@ -165,7 +164,6 @@ export function Navbar() {
                       <div className="rounded-xl border border-border bg-white p-2 shadow-xl">
                         {item.children.map((child) => {
                           const isChildActive = pathname === child.href;
-                          const ChildIcon = child.icon;
                           return (
                             <Link
                               key={child.href}
@@ -235,7 +233,6 @@ export function Navbar() {
               const isActive = item.href
                 ? pathname === item.href
                 : item.children?.some((child) => pathname === child.href);
-              const Icon = item.icon;
 
               if (item.children) {
                 const isOpenMobile = openDropdowns[item.label] !== undefined ? openDropdowns[item.label] : isActive;
@@ -257,7 +254,6 @@ export function Navbar() {
                       <div className="ml-8 space-y-1 border-l-2 border-border pl-4 pb-2">
                         {item.children.map((child) => {
                           const isChildActive = pathname === child.href;
-                          const ChildIcon = child.icon;
                           return (
                             <Link
                               key={child.href}

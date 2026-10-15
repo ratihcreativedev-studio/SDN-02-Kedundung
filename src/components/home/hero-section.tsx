@@ -67,7 +67,7 @@ export function HeroSection() {
           <div className="animate-fade-in-up animate-delay-300 mt-8 flex flex-col gap-4 opacity-0 sm:flex-row">
             <Link
               href="/#features"
-              className="group flex items-center justify-center gap-2 rounded-xl bg-secondary px-5 py-3.5 font-semibold !text-white shadow-lg shadow-secondary/20 transition-all duration-200 hover:bg-secondary-light hover:shadow-xl hover:shadow-secondary/30 sm:justify-start sm:px-6"
+              className="group flex items-center justify-center gap-2 rounded-xl bg-secondary px-5 py-3.5 font-semibold text-white! shadow-lg shadow-secondary/20 transition-all duration-200 hover:bg-secondary-light hover:shadow-xl hover:shadow-secondary/30 sm:justify-start sm:px-6"
             >
               <GraduationCap size={20} />
               Lihat Layanan Akademik
@@ -80,7 +80,7 @@ export function HeroSection() {
               href="https://bit.ly/KotakSaranSDNKedundung2"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-3.5 font-medium !text-white backdrop-blur-sm transition-all hover:bg-white/20 sm:justify-start sm:px-6"
+              className="flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-3.5 font-medium text-white! backdrop-blur-sm transition-all hover:bg-white/20 sm:justify-start sm:px-6"
             >
               <MessageSquare size={18} />
               Konsultasi & Pengaduan

@@ -4,7 +4,7 @@ import { achievementService } from '@/features/achievements/services'
 import { classQueries } from '@/features/classes/queries'
 import { studentService } from '@/features/students/services'
 import { subjectService } from '@/features/subjects/services'
-import { FileText, GraduationCap, Image as ImageIcon, Trophy, Users, LayoutDashboard } from 'lucide-react'
+import { FileText, GraduationCap, Image as ImageIcon, Trophy, Users, LayoutDashboard, TrendingUp } from 'lucide-react'
 
 export const metadata = {
   title: 'Dashboard Admin | SIPANDA',
@@ -22,78 +22,93 @@ export default async function DashboardPage() {
   ])
 
   const stats = [
-    { name: 'Total Siswa', value: students.length, icon: GraduationCap, color: 'from-emerald-500 to-emerald-600 shadow-emerald-500/30' },
-    { name: 'Total Kelas', value: classes.length, icon: Users, color: 'from-purple-500 to-purple-600 shadow-purple-500/30' },
-    { name: 'Mata Pelajaran', value: subjects.length, icon: FileText, color: 'from-amber-500 to-amber-600 shadow-amber-500/30' },
-    { name: 'Prestasi', value: achievements.length, icon: Trophy, color: 'from-rose-500 to-rose-600 shadow-rose-500/30' },
-    { name: 'Total Pengumuman', value: announcements.length, icon: FileText, color: 'from-blue-500 to-blue-600 shadow-blue-500/30' },
-    { name: 'Total Galeri', value: galleries.length, icon: ImageIcon, color: 'from-primary-light to-primary shadow-primary/30' },
+    { name: 'Total Siswa', value: students.length, icon: GraduationCap, gradient: 'from-emerald-500 to-teal-600', bg: 'bg-emerald-50', text: 'text-emerald-600' },
+    { name: 'Total Kelas', value: classes.length, icon: Users, gradient: 'from-violet-500 to-purple-600', bg: 'bg-violet-50', text: 'text-violet-600' },
+    { name: 'Mata Pelajaran', value: subjects.length, icon: FileText, gradient: 'from-amber-500 to-orange-600', bg: 'bg-amber-50', text: 'text-amber-600' },
+    { name: 'Prestasi', value: achievements.length, icon: Trophy, gradient: 'from-rose-500 to-pink-600', bg: 'bg-rose-50', text: 'text-rose-600' },
+    { name: 'Pengumuman', value: announcements.length, icon: FileText, gradient: 'from-blue-500 to-indigo-600', bg: 'bg-blue-50', text: 'text-blue-600' },
+    { name: 'Galeri', value: galleries.length, icon: ImageIcon, gradient: 'from-primary-light to-primary', bg: 'bg-primary/5', text: 'text-primary' },
   ]
 
   return (
-    <div className="space-y-6 sm:space-y-8 animate-fade-in-up">
+    <div className="space-y-4 sm:space-y-6 animate-fade-in-up">
+      {/* Hero */}
       <div className="page-hero">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-light to-primary shadow-lg shadow-primary/20">
-            <LayoutDashboard size={24} className="text-white" />
+          <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-linear-to-br from-primary-light to-primary shadow-lg shadow-primary/20">
+            <LayoutDashboard size={20} className="text-white sm:hidden" />
+            <LayoutDashboard size={24} className="text-white hidden sm:block" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-primary sm:text-4xl">
+            <h1 className="text-2xl font-bold text-primary sm:text-3xl lg:text-4xl">
               Dashboard
             </h1>
-            <p className="text-sm text-text-secondary sm:text-base mt-1">
-              Ringkasan statistik sistem informasi SDN Kedundung 2
+            <p className="text-xs text-text-secondary sm:text-sm mt-0.5 sm:mt-1">
+              Ringkasan statistik SDN Kedundung 2
             </p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
+      {/* Stats Grid - 2 cols on mobile, 3 on tablet+  */}
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-4 md:grid-cols-3">
         {stats.map((stat, index) => (
-          <div 
-            key={stat.name} 
-            className={`section-card flex items-center gap-5 p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-${stat.color.split('-')[1]}/10 animate-fade-in-up animate-delay-${(index % 5 + 1) * 100}`}
+          <div
+            key={stat.name}
+            className={`stat-card animate-fade-in-up`}
+            style={{ animationDelay: `${index * 0.06}s` }}
           >
-            <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${stat.color}`}>
-              <stat.icon className="h-6 w-6 text-white" />
+            <div className={`flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-linear-to-br ${stat.gradient} shadow-sm`}>
+              <stat.icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-medium text-text-secondary">{stat.name}</p>
-              <p className="text-2xl font-bold text-primary sm:text-3xl mt-1">{stat.value}</p>
+              <p className="text-[11px] sm:text-xs font-medium text-text-muted leading-tight">{stat.name}</p>
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary mt-0.5">{stat.value}</p>
             </div>
           </div>
         ))}
       </div>
-      
-      <div className="section-card p-5 sm:p-6 lg:p-8 animate-fade-in-up animate-delay-500">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-            <FileText size={20} className="text-primary" />
+
+      {/* Recent Announcements */}
+      <div className="section-card overflow-hidden animate-fade-in-up animate-delay-500">
+        <div className="flex items-center gap-2.5 p-3.5 sm:p-5 lg:p-6 border-b border-border/50">
+          <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg sm:rounded-xl bg-primary/8">
+            <TrendingUp size={16} className="text-primary sm:hidden" />
+            <TrendingUp size={18} className="text-primary hidden sm:block" />
           </div>
-          <h2 className="text-xl font-bold text-primary">Pengumuman Terbaru</h2>
+          <h2 className="text-base sm:text-lg font-bold text-primary">Pengumuman Terbaru</h2>
         </div>
-        
-        {announcements.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center bg-surface-alt rounded-xl border border-dashed border-border">
-            <FileText className="h-10 w-10 text-text-muted mb-3" />
-            <p className="text-text-secondary font-medium">Belum ada pengumuman</p>
-            <p className="text-sm text-text-muted mt-1">Pengumuman baru akan muncul di sini.</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {announcements.slice(0, 5).map((item) => (
-              <div key={item.id} className="group flex flex-col gap-3 rounded-xl border border-border bg-white p-4 transition-all hover:border-primary/30 hover:shadow-md sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0">
-                  <h3 className="font-semibold text-primary group-hover:text-primary-light transition-colors">{item.title}</h3>
-                  <p className="max-w-3xl text-sm text-text-secondary mt-1.5 leading-relaxed">{item.content}</p>
+
+        <div className="p-3.5 sm:p-5 lg:p-6">
+          {announcements.length === 0 ? (
+            <div className="empty-state">
+              <FileText className="h-8 w-8 sm:h-10 sm:w-10 text-text-muted mb-2.5" />
+              <p className="text-sm font-medium text-text-secondary">Belum ada pengumuman</p>
+              <p className="text-xs text-text-muted mt-1">Pengumuman baru akan muncul di sini.</p>
+            </div>
+          ) : (
+            <div className="space-y-2.5 sm:space-y-3">
+              {announcements.slice(0, 5).map((item) => (
+                <div
+                  key={item.id}
+                  className="group flex flex-col gap-2 rounded-xl border border-border/60 bg-white p-3 sm:p-4 transition-all hover:border-primary/20 hover:shadow-sm sm:flex-row sm:items-start sm:justify-between"
+                >
+                  <div className="min-w-0">
+                    <h3 className="text-sm font-semibold text-primary group-hover:text-primary-light transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-text-secondary mt-1 leading-relaxed line-clamp-2">
+                      {item.content}
+                    </p>
+                  </div>
+                  <span className="shrink-0 self-start inline-flex items-center rounded-lg bg-surface-alt px-2 py-0.5 text-[10px] sm:text-xs font-medium text-text-muted border border-border/50">
+                    {new Date(item.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </span>
                 </div>
-                <span className="shrink-0 inline-flex items-center rounded-full bg-surface-alt px-2.5 py-1 text-xs font-medium text-text-secondary border border-border">
-                  {new Date(item.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

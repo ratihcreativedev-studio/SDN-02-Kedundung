@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { auth, googleProvider } from '@/lib/firebase/config'
 import { signInWithPopup } from 'firebase/auth'
 import { LogIn, AlertCircle } from 'lucide-react'
@@ -8,18 +8,10 @@ import { useRouter } from 'next/navigation'
 
 import { setSessionAction } from '../actions'
 
-export function LoginForm() {
+export function LoginForm({ initialError = '' }: { initialError?: string }) {
   const [isPending, setIsPending] = useState(false)
-  const [errorMsg, setErrorMsg] = useState('')
+  const [errorMsg, setErrorMsg] = useState(initialError)
   const router = useRouter()
-
-  useEffect(() => {
-    // Check if there is an error in URL params
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('error') === 'auth-failed') {
-      setErrorMsg('Autentikasi gagal atau Anda tidak memiliki akses.')
-    }
-  }, [])
 
   const handleGoogleLogin = async () => {
     setIsPending(true)
@@ -32,15 +24,18 @@ export function LoginForm() {
       }
 
       // Verifikasi whitelist dan set session
-      const res = await setSessionAction(result.user.email, result.user.photoURL)
+      const idToken = await result.user.getIdToken(true)
+      const res = await setSessionAction(idToken, result.user.photoURL)
       if (res?.error) {
         throw new Error(res.error)
       }
       
-      router.push('/admin')
+      router.replace('/admin')
+      router.refresh()
       
     } catch (error) {
       setErrorMsg(error instanceof Error ? error.message : 'Gagal masuk dengan Google.')
+    } finally {
       setIsPending(false)
     }
   }

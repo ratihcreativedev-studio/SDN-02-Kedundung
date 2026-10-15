@@ -20,10 +20,11 @@ export function DeleteGalleryButton({ id }: { id: string }) {
           router.refresh()
         })
       }}
-      className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors shadow-sm disabled:opacity-50"
+      className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-white px-2 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:opacity-50"
       aria-label="Hapus foto"
     >
-      <Trash2 className="h-5 w-5" />
+      <Trash2 className="h-4 w-4 shrink-0" aria-hidden="true" />
+      {isPending ? 'Menghapus...' : 'Hapus foto'}
     </button>
   )
 }

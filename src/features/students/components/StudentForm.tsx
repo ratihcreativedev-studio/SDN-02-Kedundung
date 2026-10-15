@@ -76,7 +76,7 @@ export function StudentForm({ classes, student }: StudentFormProps) {
                   required
                   defaultValue={student?.nisn ?? ''}
                   placeholder="Masukkan 10 digit NISN"
-                  className="w-full h-[46px] rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                  className="w-full h-11.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 />
               </div>
 
@@ -91,7 +91,7 @@ export function StudentForm({ classes, student }: StudentFormProps) {
                   required
                   defaultValue={student?.name ?? ''}
                   placeholder="Contoh: Budi Santoso"
-                  className="w-full h-[46px] rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                  className="w-full h-11.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 />
               </div>
 
@@ -104,7 +104,7 @@ export function StudentForm({ classes, student }: StudentFormProps) {
                   name="classId"
                   required
                   defaultValue={student?.classId ?? ''}
-                  className="w-full h-[46px] rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                  className="w-full h-11.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 >
                   <option value="">-- Pilih Kelas --</option>
                   {classes.map((cls) => (
@@ -131,7 +131,7 @@ export function StudentForm({ classes, student }: StudentFormProps) {
                   type="text"
                   defaultValue={student?.nipd ?? ''}
                   placeholder="Nomor Induk Peserta Didik"
-                  className="w-full h-[46px] rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                  className="w-full h-11.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 />
               </div>
 
@@ -143,7 +143,7 @@ export function StudentForm({ classes, student }: StudentFormProps) {
                   id="gender"
                   name="gender"
                   defaultValue={student?.gender ?? ''}
-                  className="w-full h-[46px] rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                  className="w-full h-11.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 >
                   <option value="">-- Pilih Jenis Kelamin --</option>
                   <option value="L">Laki-Laki</option>
@@ -161,7 +161,7 @@ export function StudentForm({ classes, student }: StudentFormProps) {
                   type="text"
                   defaultValue={student?.birthPlace ?? ''}
                   placeholder="Contoh: Mojokerto"
-                  className="w-full h-[46px] rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                  className="w-full h-11.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 />
               </div>
 
@@ -174,7 +174,7 @@ export function StudentForm({ classes, student }: StudentFormProps) {
                   name="birthDate"
                   type="date"
                   defaultValue={formattedDate}
-                  className="w-full h-[46px] rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                  className="w-full h-11.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 />
               </div>
 
@@ -188,7 +188,7 @@ export function StudentForm({ classes, student }: StudentFormProps) {
                   type="text"
                   defaultValue={student?.nik ?? ''}
                   placeholder="16 Digit NIK"
-                  className="w-full h-[46px] rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                  className="w-full h-11.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 />
               </div>
 
@@ -202,7 +202,7 @@ export function StudentForm({ classes, student }: StudentFormProps) {
                   type="text"
                   defaultValue={student?.religion ?? ''}
                   placeholder="Contoh: Islam"
-                  className="w-full h-[46px] rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                  className="w-full h-11.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 />
               </div>
             </div>
@@ -222,7 +222,7 @@ export function StudentForm({ classes, student }: StudentFormProps) {
                   type="text"
                   defaultValue={student?.address ?? ''}
                   placeholder="Nama jalan, gang, RT/RW"
-                  className="w-full h-[46px] rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                  className="w-full h-11.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 />
               </div>
 
@@ -236,7 +236,7 @@ export function StudentForm({ classes, student }: StudentFormProps) {
                   type="text"
                   defaultValue={student?.village ?? ''}
                   placeholder="Contoh: Kedundung"
-                  className="w-full h-[46px] rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                  className="w-full h-11.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 />
               </div>
 
@@ -250,7 +250,7 @@ export function StudentForm({ classes, student }: StudentFormProps) {
                   type="text"
                   defaultValue={student?.district ?? ''}
                   placeholder="Contoh: Magersari"
-                  className="w-full h-[46px] rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                  className="w-full h-11.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 />
               </div>
             </div>
@@ -270,7 +270,7 @@ export function StudentForm({ classes, student }: StudentFormProps) {
                   type="text"
                   defaultValue={student?.fatherName ?? ''}
                   placeholder="Nama Ayah"
-                  className="w-full h-[46px] rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                  className="w-full h-11.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 />
               </div>
 
@@ -284,7 +284,7 @@ export function StudentForm({ classes, student }: StudentFormProps) {
                   type="text"
                   defaultValue={student?.fatherJob ?? ''}
                   placeholder="Contoh: Karyawan Swasta"
-                  className="w-full h-[46px] rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                  className="w-full h-11.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 />
               </div>
 
@@ -298,7 +298,7 @@ export function StudentForm({ classes, student }: StudentFormProps) {
                   type="text"
                   defaultValue={student?.motherName ?? ''}
                   placeholder="Nama Ibu"
-                  className="w-full h-[46px] rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                  className="w-full h-11.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 />
               </div>
             </div>

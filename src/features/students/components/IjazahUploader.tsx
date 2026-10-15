@@ -56,7 +56,7 @@ export function IjazahUploader({ studentId, existingUrl }: IjazahUploaderProps) 
         const fileInput = document.getElementById('ijazah-upload') as HTMLInputElement
         if (fileInput) fileInput.value = ''
       }
-    } catch (err) {
+    } catch {
       setError('Terjadi kesalahan saat mengunggah')
     } finally {
       setIsLoading(false)
@@ -79,7 +79,7 @@ export function IjazahUploader({ studentId, existingUrl }: IjazahUploaderProps) 
       } else {
         setDeleteSuccess(true)
       }
-    } catch (err) {
+    } catch {
       setError('Terjadi kesalahan saat menghapus')
     } finally {
       setIsDeleting(false)

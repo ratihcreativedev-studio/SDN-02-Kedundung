@@ -1,10 +1,10 @@
-import Link from 'next/link'
 import { CalendarCheck } from 'lucide-react'
 import { classQueries } from '@/features/classes/queries'
 import { studentService } from '@/features/students/services'
 import { attendanceQueries } from '@/features/attendance/queries'
 import { AttendanceUploadClient } from '@/features/attendance/components/AttendanceUploadClient'
 import { MonthFilter } from '@/features/attendance/components/MonthFilter'
+import { PageHeader } from '@/components/layout/page-header'
 
 export const metadata = {
   title: 'Absensi Bulanan | SIPANDA Admin',
@@ -42,18 +42,13 @@ export default async function AdminAbsensiPage({
     : [[], []]
 
   return (
-    <div className="space-y-5 sm:space-y-6">
-      <div className="page-hero animate-fade-in-up">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 to-teal-600 shadow-lg shadow-teal-500/20">
-            <CalendarCheck size={24} className="text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-primary sm:text-4xl">Absensi Bulanan</h1>
-            <p className="mt-1 text-sm text-text-secondary sm:text-base">Upload rekap kehadiran siswa per kelas via file Excel.</p>
-          </div>
-        </div>
-      </div>
+    <div className="space-y-4 sm:space-y-6">
+      <PageHeader
+        title="Absensi Bulanan"
+        description="Upload rekap kehadiran siswa per kelas via file Excel."
+        icon={CalendarCheck}
+        iconGradient="from-teal-500 to-teal-600"
+      />
 
       <MonthFilter classes={classes} classId={classId} monthYearVal={monthYearVal} basePath="/admin/absensi" />
 

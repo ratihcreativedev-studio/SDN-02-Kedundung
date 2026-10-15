@@ -81,7 +81,7 @@ export default async function InformasiDetailPage({ params }: PageParams) {
   }
 
   return (
-    <div className="page-shell bg-[#f8fafc]">
+    <div className="page-shell bg-background">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         
         {/* Back navigation */}
@@ -116,7 +116,7 @@ export default async function InformasiDetailPage({ params }: PageParams) {
               <img
                 src={announcement.thumbnail}
                 alt={announcement.title}
-                className="w-full max-h-[600px] object-contain"
+                className="w-full max-h-150 object-contain"
               />
             </div>
           )}

@@ -37,21 +37,24 @@ export function Pagination({ totalPages, currentPage }: { totalPages: number; cu
 
   return (
     <div className="flex items-center justify-between px-4 py-3 sm:px-6 mt-4 bg-surface-alt/50 rounded-xl border border-border">
-      <div className="flex flex-1 justify-between sm:hidden">
-        <button
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage <= 1}
-          className="relative inline-flex items-center rounded-md border border-border bg-white px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Sebelumn
-        </button>
-        <button
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage >= totalPages}
-          className="relative ml-3 inline-flex items-center rounded-md border border-border bg-white px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Selanjut
-        </button>
+      <div className="flex flex-1 flex-col gap-3 sm:hidden">
+        <p className="text-center text-sm text-text-secondary">Halaman {currentPage} dari {totalPages}</p>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage <= 1}
+            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border bg-white px-2 py-2 text-sm font-medium text-primary hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Sebelumnya
+          </button>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage >= totalPages}
+            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border bg-white px-2 py-2 text-sm font-medium text-primary hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Selanjutnya
+          </button>
+        </div>
       </div>
       <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
         <div>
@@ -78,10 +81,11 @@ export function Pagination({ totalPages, currentPage }: { totalPages: number; cu
               ) : (
                 <button
                   key={`page-${p}`}
+                  aria-current={p === currentPage ? 'page' : undefined}
                   onClick={() => handlePageChange(p as number)}
                   className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 focus:outline-offset-0 ring-1 ring-inset ring-border transition-colors ${
                     p === currentPage
-                      ? 'z-10 bg-primary text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
+                      ? 'z-10 bg-primary text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
                       : 'text-text-secondary bg-white hover:bg-surface-alt'
                   }`}
                 >

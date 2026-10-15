@@ -1,15 +1,16 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { cookies } from 'next/headers'
 import { studentSchema } from './schemas'
 import { studentService } from './services'
+import { requireAdminEmail } from '@/lib/auth'
 
 export async function createStudentAction(formData: FormData) {
-  const cookieStore = await cookies()
-  const session = cookieStore.get('sipanda-auth')
-
-  if (!session?.value) return { error: 'Unauthorized' }
+  try {
+    await requireAdminEmail()
+  } catch {
+    return { error: 'Unauthorized' }
+  }
 
   const parsed = studentSchema.safeParse(Object.fromEntries(formData))
   if (!parsed.success) return { error: 'Data tidak valid' }
@@ -24,10 +25,11 @@ export async function createStudentAction(formData: FormData) {
 }
 
 export async function updateStudentAction(id: string, formData: FormData) {
-  const cookieStore = await cookies()
-  const session = cookieStore.get('sipanda-auth')
-
-  if (!session?.value) return { error: 'Unauthorized' }
+  try {
+    await requireAdminEmail()
+  } catch {
+    return { error: 'Unauthorized' }
+  }
 
   const parsed = studentSchema.safeParse(Object.fromEntries(formData))
   if (!parsed.success) return { error: 'Data tidak valid' }
@@ -42,10 +44,11 @@ export async function updateStudentAction(id: string, formData: FormData) {
 }
 
 export async function deleteStudentAction(id: string) {
-  const cookieStore = await cookies()
-  const session = cookieStore.get('sipanda-auth')
-
-  if (!session?.value) return { error: 'Unauthorized' }
+  try {
+    await requireAdminEmail()
+  } catch {
+    return { error: 'Unauthorized' }
+  }
 
   try {
     await studentService.delete(id)
@@ -57,8 +60,6 @@ export async function deleteStudentAction(id: string) {
 }
 
 import { storageService } from '@/services/storage.service'
-import { requireAdminEmail } from '@/lib/auth'
-
 export async function uploadIjazahAction(studentId: string, formData: FormData) {
   try {
     await requireAdminEmail()

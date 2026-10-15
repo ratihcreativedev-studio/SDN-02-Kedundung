@@ -4,7 +4,7 @@ export function PrestasiHero() {
   return (
     <div className="page-hero">
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-amber-600">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-amber-500 to-amber-600">
           <Trophy size={20} className="text-white" />
         </div>
         <div>

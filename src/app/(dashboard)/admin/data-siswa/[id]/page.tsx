@@ -18,9 +18,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function StudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params
-  let student
-  let grades: any[] = []
-  let attendances: any[] = []
+  let student: Awaited<ReturnType<typeof studentService.getById>>
+  let grades: Awaited<ReturnType<typeof gradeQueries.findByStudent>> = []
+  let attendances: Awaited<ReturnType<typeof attendanceQueries.findByStudent>> = []
   try {
     student = await studentService.getById(resolvedParams.id)
     grades = await gradeQueries.findByStudent(student.id)
@@ -46,7 +46,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   }))
 
   // Attendance is now stored as monthly summaries directly
-  const monthlyAttendances = attendances.map((att: any) => ({
+  const monthlyAttendances = attendances.map((att) => ({
     month: att.monthYear,
     hadir: att.hadir,
     sakit: att.sakit,
@@ -71,7 +71,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         <div className="lg:col-span-1 space-y-6">
           {/* Profile Card */}
           <div className="section-card p-6 flex flex-col items-center text-center h-fit">
-            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-primary-light to-primary shadow-lg shadow-primary/20 mb-4 text-white text-3xl font-bold">
+            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-primary-light to-primary shadow-lg shadow-primary/20 mb-4 text-white text-3xl font-bold">
               {student.name.charAt(0).toUpperCase()}
             </div>
             <h2 className="text-xl font-bold text-primary mb-1">{student.name}</h2>

@@ -39,7 +39,7 @@ export function AttendanceTable({
     <form action={formAction} className="section-card overflow-hidden animate-fade-in-up animate-delay-200">
       <input type="hidden" name="date" value={date} />
       <div className="overflow-x-auto">
-        <table className="min-w-[720px] w-full text-left text-sm">
+        <table className="min-w-180 w-full text-left text-sm">
           <thead className="bg-surface-alt text-text-secondary border-b border-border">
             <tr>
               <th className="px-6 py-4 font-semibold">NISN</th>

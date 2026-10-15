@@ -5,6 +5,7 @@ import { subjectService } from '@/features/subjects/services'
 import { gradeQueries } from '@/features/grades/queries'
 import { GradeUploadClient } from '@/features/grades/components/GradeUploadClient'
 import { GradeFilter } from '@/features/grades/components/GradeFilter'
+import { PageHeader } from '@/components/layout/page-header'
 
 export const metadata = {
   title: 'Daftar Nilai | SIPANDA Admin',
@@ -29,26 +30,23 @@ export default async function AdminNilaiPage({
   const gradeMap = Object.fromEntries(grades.map((item) => [item.studentId, item]))
 
   return (
-    <div className="space-y-5 sm:space-y-6">
-      <div className="page-hero animate-fade-in-up">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-lg shadow-orange-500/20">
-            <ClipboardList size={24} className="text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-primary sm:text-4xl">Daftar Nilai</h1>
-            <p className="mt-1 text-sm text-text-secondary sm:text-base">Upload nilai siswa via file Excel per kelas, mata pelajaran, dan semester.</p>
-          </div>
-        </div>
-      </div>
+    <div className="space-y-4 sm:space-y-6">
+      <PageHeader
+        title="Daftar Nilai"
+        description="Upload nilai siswa via file Excel per kelas, mapel, dan semester."
+        icon={ClipboardList}
+        iconGradient="from-orange-500 to-orange-600"
+      />
 
       <GradeFilter classes={classes} subjects={subjects} classId={classId} subjectId={subjectId} semester={semester} />
 
       {subjectId ? (
         <GradeUploadClient subjectId={subjectId} semester={semester} students={students} gradeMap={gradeMap} />
       ) : (
-        <div className="section-card p-10 text-center text-text-muted animate-fade-in-up animate-delay-200">
-          Tambahkan mata pelajaran terlebih dahulu.
+        <div className="section-card">
+          <div className="empty-state">
+            <p className="text-sm text-text-muted">Tambahkan mata pelajaran terlebih dahulu.</p>
+          </div>
         </div>
       )}
     </div>

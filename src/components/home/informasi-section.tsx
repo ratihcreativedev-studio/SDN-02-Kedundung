@@ -41,7 +41,7 @@ export async function InformasiSection() {
             <div className="mt-10 flex justify-center">
               <Link
                 href="/informasi"
-                className="group inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3.5 font-semibold !text-white shadow-lg shadow-primary/20 transition-all duration-200 hover:bg-primary-light hover:shadow-xl hover:shadow-primary/30"
+                className="group inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3.5 font-semibold text-white! shadow-lg shadow-primary/20 transition-all duration-200 hover:bg-primary-light hover:shadow-xl hover:shadow-primary/30"
               >
                 Lihat Semua Informasi
                 <ArrowRight

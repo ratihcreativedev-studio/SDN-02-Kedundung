@@ -9,7 +9,7 @@ export async function TeacherList() {
   return (
     <div className="section-card overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="min-w-[760px] w-full text-left text-sm">
+        <table className="min-w-190 w-full text-left text-sm">
           <thead className="bg-surface-alt text-text-secondary border-b border-border">
             <tr>
               <th className="px-6 py-4 font-semibold">Nama</th>

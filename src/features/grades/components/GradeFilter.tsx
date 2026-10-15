@@ -29,7 +29,7 @@ export function GradeFilter({
 
   return (
     <div className="section-card flex flex-col gap-4 p-5 sm:flex-row sm:flex-wrap sm:items-end animate-fade-in-up animate-delay-100">
-      <label className="space-y-2 sm:flex-1 sm:min-w-[140px]">
+      <label className="space-y-2 sm:flex-1 sm:min-w-35">
         <span className="block text-sm font-semibold text-primary">Kelas</span>
         <select
           value={cls}
@@ -42,7 +42,7 @@ export function GradeFilter({
         </select>
       </label>
 
-      <label className="space-y-2 sm:flex-1 sm:min-w-[160px]">
+      <label className="space-y-2 sm:flex-1 sm:min-w-40">
         <span className="block text-sm font-semibold text-primary">Mata Pelajaran</span>
         <select
           value={subj}
@@ -55,7 +55,7 @@ export function GradeFilter({
         </select>
       </label>
 
-      <label className="space-y-2 sm:flex-1 sm:min-w-[160px]">
+      <label className="space-y-2 sm:flex-1 sm:min-w-40">
         <span className="block text-sm font-semibold text-primary">Semester</span>
         <select
           value={sem}

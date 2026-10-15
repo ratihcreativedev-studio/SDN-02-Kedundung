@@ -1,5 +1,4 @@
 import { getStudentByNISNAction } from '@/features/students/actions'
-import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, User, BookOpen, CalendarDays, Download } from 'lucide-react'
 

@@ -101,7 +101,7 @@ export function GalleryForm() {
               id="caption"
               name="caption"
               placeholder="Contoh: Kegiatan Pramuka Kelas 5"
-              className="w-full h-[46px] rounded-xl border border-border bg-surface-alt px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+              className="w-full h-11.5 rounded-xl border border-border bg-surface-alt px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
             />
           </div>
 

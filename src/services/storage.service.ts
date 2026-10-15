@@ -8,7 +8,7 @@ export const storageService = {
     const fileExt = file.name.split('.').pop()
     const fileName = `${folder}/${uuidv4()}.${fileExt}`
 
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from('sipanda-images')
       .upload(fileName, file, {
         cacheControl: '3600',
@@ -37,7 +37,7 @@ export const storageService = {
     const fileExt = file.name.split('.').pop()
     const fileName = `${folder}/${uuidv4()}.${fileExt}`
 
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from('sipanda-images')
       .upload(fileName, file, {
         cacheControl: '3600',

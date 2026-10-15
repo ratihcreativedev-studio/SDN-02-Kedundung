@@ -75,7 +75,7 @@ export function AnnouncementForm({
               required
               defaultValue={announcement?.title ?? ''}
               placeholder="Contoh: Libur Semester Ganjil"
-              className="w-full h-[46px] rounded-xl border border-border bg-surface-alt px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+              className="w-full h-11.5 rounded-xl border border-border bg-surface-alt px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
             />
           </div>
 
@@ -98,7 +98,7 @@ export function AnnouncementForm({
               <label className="block text-sm font-medium text-primary">
                 Thumbnail Pengumuman
               </label>
-              <div className="group relative flex min-h-[160px] justify-center overflow-hidden rounded-xl border-2 border-dashed border-border px-4 pb-6 pt-5 sm:px-6 transition-colors hover:border-primary/40">
+              <div className="group relative flex min-h-40 justify-center overflow-hidden rounded-xl border-2 border-dashed border-border px-4 pb-6 pt-5 sm:px-6 transition-colors hover:border-primary/40">
                 {previewUrl ? (
                   <div className="absolute inset-0 w-full h-full">
                     {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Header } from '@/components/layout/header'
 import { Sidebar } from '@/components/layout/sidebar'
 
@@ -14,14 +14,17 @@ export function DashboardShell({
   children: React.ReactNode
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const closeSidebar = useCallback(() => setIsSidebarOpen(false), [])
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+    <div className="flex h-dvh overflow-hidden bg-background">
+      <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header email={email} photoURL={photoURL} onMenuClick={() => setIsSidebarOpen(true)} />
-        <main className="min-w-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 lg:px-8">
-          {children}
+        <Header email={email} photoURL={photoURL} isMenuOpen={isSidebarOpen} onMenuClick={() => setIsSidebarOpen(true)} />
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="mx-auto max-w-7xl px-3 py-4 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+            {children}
+          </div>
         </main>
       </div>
     </div>

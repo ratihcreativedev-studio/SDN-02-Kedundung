@@ -24,7 +24,7 @@ export function SubjectAllocationForm({
     <form action={formAction} className="space-y-3">
       <div className="flex flex-wrap gap-2">
         {classes.map((cls) => (
-          <label key={cls.id} className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors has-[:checked]:border-primary/30 has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+          <label key={cls.id} className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors has-checked:border-primary/30 has-checked:bg-primary/10 has-checked:text-primary">
             <input type="checkbox" name="classIds" value={cls.id} defaultChecked={selectedClassIds.includes(cls.id)} className="h-3.5 w-3.5 rounded border-border text-primary focus:ring-primary" />
             {cls.name}
           </label>

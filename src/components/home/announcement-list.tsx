@@ -3,17 +3,13 @@
 import { Calendar } from "lucide-react";
 import Link from "next/link";
 
-// Helper to consistently format Indonesian dates on client & server (prevents hydration warnings)
 function formatDate(dateStr: Date | string) {
-  const date = new Date(dateStr);
-  const day = date.getDate();
-  const months = [
-    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-  ];
-  const month = months[date.getMonth()];
-  const year = date.getFullYear();
-  return `${day} ${month} ${year}`;
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Asia/Jakarta",
+  }).format(new Date(dateStr));
 }
 
 // Helper to convert plain text URLs into clickable links with broader patterns
@@ -28,23 +24,19 @@ function renderContentWithLinks(text: string) {
         if (isUrl) {
           const href = part.startsWith("www.") 
             ? `https://${part}` 
-            : !/^https?:\/\//i.test(part) && !part.startsWith("mailto:")
+            : !/^(?:https?:\/\/|ftp:\/\/|mailto:)/i.test(part)
               ? `https://${part}`
               : part;
           return (
-            <span
+            <a
               key={i}
-              onClick={(e) => e.stopPropagation()} // Prevents the card link navigation
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="announcement-link relative z-10"
             >
-              <a
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="announcement-link"
-              >
-                {part}
-              </a>
-            </span>
+              {part}
+            </a>
           );
         }
         return <span key={i}>{part}</span>;
@@ -78,10 +70,9 @@ export function AnnouncementList({ announcements }: { announcements: Announcemen
           : item.content;
 
         return (
-          <Link
+          <article
             key={item.id}
-            href={`/informasi/${item.id}`}
-            className="group flex flex-col justify-between rounded-2xl border border-border bg-white overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/10 hover:shadow-lg cursor-pointer"
+            className="group relative flex flex-col justify-between rounded-2xl border border-border bg-white overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/10 hover:shadow-lg"
           >
             <div>
               {item.thumbnail && (
@@ -100,7 +91,12 @@ export function AnnouncementList({ announcements }: { announcements: Announcemen
                   {formatDate(item.createdAt)}
                 </div>
                 <h3 className="mb-3 text-xl font-bold text-primary group-hover:text-primary-light transition-colors line-clamp-2">
-                  {item.title}
+                  <Link
+                    href={`/informasi/${item.id}`}
+                    className="after:absolute after:inset-0 focus-visible:after:outline-2 focus-visible:after:outline-primary focus-visible:after:-outline-offset-2"
+                  >
+                    {item.title}
+                  </Link>
                 </h3>
                 <p className="text-text-secondary leading-relaxed">
                   {renderContentWithLinks(displayContent)}
@@ -116,7 +112,7 @@ export function AnnouncementList({ announcements }: { announcements: Announcemen
                 </span>
               </div>
             )}
-          </Link>
+          </article>
         );
       })}
     </div>

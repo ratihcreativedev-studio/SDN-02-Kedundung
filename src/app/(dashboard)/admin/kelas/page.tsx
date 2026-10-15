@@ -1,6 +1,6 @@
 import { ClassList } from '@/features/classes/components/ClassList'
-import { Plus, GraduationCap } from 'lucide-react'
-import Link from 'next/link'
+import { GraduationCap } from 'lucide-react'
+import { PageHeader } from '@/components/layout/page-header'
 
 export const metadata = {
   title: 'Data Kelas | SIPANDA Admin',
@@ -9,27 +9,15 @@ export const metadata = {
 
 export default function KelasPage() {
   return (
-    <div className="space-y-6 sm:space-y-8 animate-fade-in-up">
-      <div className="page-hero">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-light to-primary shadow-lg shadow-primary/20">
-              <GraduationCap size={24} className="text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-primary sm:text-4xl">Data Kelas</h1>
-              <p className="mt-1 text-sm text-text-secondary sm:text-base">Kelola rombongan belajar SDN Kedundung 2</p>
-            </div>
-          </div>
-          <Link
-            href="/admin/kelas/tambah"
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-secondary to-secondary-light px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-secondary/30 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-secondary/40"
-          >
-            <Plus className="h-5 w-5" />
-            Tambah Kelas
-          </Link>
-        </div>
-      </div>
+    <div className="space-y-4 sm:space-y-6 animate-fade-in-up">
+      <PageHeader
+        title="Data Kelas"
+        description="Kelola rombongan belajar SDN Kedundung 2"
+        icon={GraduationCap}
+        iconGradient="from-primary-light to-primary"
+        actionLabel="Tambah Kelas"
+        actionHref="/admin/kelas/tambah"
+      />
 
       <div className="animate-fade-in-up animate-delay-100">
         <ClassList />

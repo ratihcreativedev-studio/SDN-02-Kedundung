@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 const LOGIN_PATH = '/login'
 export function proxy(request: NextRequest) {
-  const hasSession = request.cookies.has('sipanda-auth')
+  const hasSession = Boolean(request.cookies.get('sipanda-token')?.value)
 
   if (!hasSession) {
     const url = request.nextUrl.clone()

@@ -1,6 +1,7 @@
 import { DashboardShell } from '@/components/layout/dashboard-shell'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { requireAdminEmail } from '@/lib/auth'
 
 export default async function DashboardLayout({
   children,
@@ -8,13 +9,14 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }) {
   const cookieStore = await cookies()
-  const session = cookieStore.get('sipanda-auth')
   const photoSession = cookieStore.get('sipanda-photo')
 
-  // Guard untuk proteksi route di sisi server (meskipun middleware/proxy.ts sudah mengecek)
-  if (!session) {
+  let email: string
+  try {
+    email = await requireAdminEmail()
+  } catch {
     redirect('/login')
   }
 
-  return <DashboardShell email={session.value} photoURL={photoSession?.value}>{children}</DashboardShell>
+  return <DashboardShell email={email} photoURL={photoSession?.value}>{children}</DashboardShell>
 }

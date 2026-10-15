@@ -73,7 +73,8 @@ export function StudentFilters() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Cari nama atau NISN..."
-          className="block w-full rounded-lg border border-border bg-white py-2 pl-10 pr-3 text-sm text-primary placeholder:text-text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+          aria-label="Cari siswa berdasarkan nama atau NISN"
+          className="block min-h-11 w-full rounded-lg border border-border bg-white py-2 pl-10 pr-3 text-sm text-primary placeholder:text-text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
         />
       </div>
 
@@ -82,7 +83,8 @@ export function StudentFilters() {
         <select
           value={currentSort}
           onChange={handleSortChange}
-          className="block w-full rounded-lg border border-border bg-white py-2 pl-3 pr-8 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors cursor-pointer"
+          aria-label="Urutkan daftar siswa"
+          className="block min-h-11 w-full rounded-lg border border-border bg-white py-2 pl-3 pr-8 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors cursor-pointer"
         >
           <option value="name-asc">Nama (A-Z)</option>
           <option value="name-desc">Nama (Z-A)</option>

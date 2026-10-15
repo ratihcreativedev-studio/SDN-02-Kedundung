@@ -70,7 +70,7 @@ export function AchievementForm({
               onFocus={() => setShowDropdown(true)}
               onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
               placeholder="Ketik nama atau NISN siswa..."
-              className="w-full h-[46px] rounded-xl border border-border bg-surface-alt px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+              className="w-full h-11.5 rounded-xl border border-border bg-surface-alt px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
               required={!selectedStudentId}
             />
             {showDropdown && (
@@ -97,28 +97,28 @@ export function AchievementForm({
           </label>
           <label className="space-y-2 sm:col-span-2">
             <span className="block text-sm font-medium text-primary">Judul Prestasi</span>
-            <input name="title" required defaultValue={achievement?.title ?? ''} className="w-full h-[46px] rounded-xl border border-border bg-surface-alt px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors" />
+            <input name="title" required defaultValue={achievement?.title ?? ''} className="w-full h-11.5 rounded-xl border border-border bg-surface-alt px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors" />
           </label>
           <label className="space-y-2">
             <span className="block text-sm font-medium text-primary">Tingkat</span>
-            <input name="level" required defaultValue={achievement?.level ?? ''} placeholder="Kota, Provinsi, Nasional" className="w-full h-[46px] rounded-xl border border-border bg-surface-alt px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors" />
+            <input name="level" required defaultValue={achievement?.level ?? ''} placeholder="Kota, Provinsi, Nasional" className="w-full h-11.5 rounded-xl border border-border bg-surface-alt px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors" />
           </label>
           <label className="space-y-2">
             <span className="block text-sm font-medium text-primary">Peringkat</span>
-            <input name="rank" defaultValue={achievement?.rank ?? ''} placeholder="Juara 1" className="w-full h-[46px] rounded-xl border border-border bg-surface-alt px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors" />
+            <input name="rank" defaultValue={achievement?.rank ?? ''} placeholder="Juara 1" className="w-full h-11.5 rounded-xl border border-border bg-surface-alt px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors" />
           </label>
           <label className="space-y-2">
             <span className="block text-sm font-medium text-primary">Nama Lomba</span>
-            <input name="eventName" required defaultValue={achievement?.eventName ?? ''} className="w-full h-[46px] rounded-xl border border-border bg-surface-alt px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors" />
+            <input name="eventName" required defaultValue={achievement?.eventName ?? ''} className="w-full h-11.5 rounded-xl border border-border bg-surface-alt px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors" />
           </label>
           <label className="space-y-2">
             <span className="block text-sm font-medium text-primary">Tanggal</span>
-            <input type="date" name="date" defaultValue={achievement?.date ? achievement.date.toISOString().slice(0, 10) : ''} className="w-full h-[46px] rounded-xl border border-border bg-surface-alt px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors" />
+            <input type="date" name="date" defaultValue={achievement?.date ? achievement.date.toISOString().slice(0, 10) : ''} className="w-full h-11.5 rounded-xl border border-border bg-surface-alt px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors" />
           </label>
           
           <div className="space-y-2 sm:col-span-2">
             <label className="block text-sm font-medium text-primary">Foto Prestasi</label>
-            <div className="group relative flex min-h-[200px] justify-center overflow-hidden rounded-xl border-2 border-dashed border-border px-4 pb-6 pt-5 sm:px-6 transition-colors hover:border-primary/40">
+            <div className="group relative flex min-h-50 justify-center overflow-hidden rounded-xl border-2 border-dashed border-border px-4 pb-6 pt-5 sm:px-6 transition-colors hover:border-primary/40">
               {previewUrl ? (
                 <div className="absolute inset-0 w-full h-full">
                   {/* eslint-disable-next-line @next/next/no-img-element */}

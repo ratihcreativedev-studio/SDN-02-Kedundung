@@ -15,7 +15,7 @@ export function DataSiswaHero({ totalShown }: DataSiswaHeroProps) {
             Data Akademik
           </div>
           <div className="mb-2 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-blue-500 to-blue-600">
               <Users size={20} className="text-white" />
             </div>
             <div>
