@@ -22,8 +22,8 @@ model Profile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  announcements Announcement[]
-  homeroomClasses Class[] @relation("ClassHomeroom")
+  announcements   Announcement[]
+  homeroomClasses Class[]        @relation("ClassHomeroom")
 
   @@map("profiles")
 }
@@ -75,45 +75,54 @@ model Gallery {
 // -----------------------------------------------------------------------------
 
 model Class {
-  id        String   @id @default(cuid())
-  name      String   // misal: "Kelas 1", "Kelas 2A"
+  id         String   @id @default(cuid())
+  name       String // misal: "Kelas 1", "Kelas 2A"
   homeroomId String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  students  Student[]
-  homeroom  Profile? @relation("ClassHomeroom", fields: [homeroomId], references: [id], onDelete: SetNull)
-  subjects  ClassSubject[]
+  students Student[]
+  homeroom Profile?       @relation("ClassHomeroom", fields: [homeroomId], references: [id], onDelete: SetNull)
+  subjects ClassSubject[]
 
   @@map("classes")
 }
 
-model Student {
-  id        String   @id @default(cuid())
-  nisn      String   @unique
-  name      String
-  classId   String
+enum StudentStatus {
+  active
+  inactive
+  graduate
+}
 
-  nipd        String?
-  gender      String?
-  birthPlace  String?
-  birthDate   DateTime? @db.Date
-  nik         String?
-  religion    String?
-  address     String?   @db.Text
-  village     String?
-  district    String?
-  fatherName  String?
-  fatherJob   String?
-  motherName  String?
-  ijazahUrl   String?
+model Student {
+  id             String        @id @default(cuid())
+  nisn           String        @unique
+  name           String
+  classId        String?
+  status         StudentStatus @default(active)
+  graduationDate DateTime?     @db.Date
+
+  nipd       String?
+  gender     String?
+  birthPlace String?
+  birthDate  DateTime? @db.Date
+  nik        String?
+  religion   String?
+  address    String?   @db.Text
+  village    String?
+  district   String?
+  fatherName String?
+  fatherJob  String?
+  motherName String?
+  ijazahUrl  String?
+  note       String?   @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  class       Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
-  grades      Grade[]
-  attendances Attendance[]
+  class        Class?        @relation(fields: [classId], references: [id], onDelete: SetNull)
+  grades       Grade[]
+  attendances  Attendance[]
   achievements Achievement[]
 
   @@map("students")
@@ -121,12 +130,12 @@ model Student {
 
 model Subject {
   id        String   @id @default(cuid())
-  name      String   // misal: "Matematika", "Bahasa Indonesia"
+  name      String // misal: "Matematika", "Bahasa Indonesia"
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  grades    Grade[]
-  classes   ClassSubject[]
+  grades  Grade[]
+  classes ClassSubject[]
 
   @@map("subjects")
 }
@@ -148,7 +157,7 @@ model Grade {
   id        String   @id @default(cuid())
   studentId String
   subjectId String
-  semester  String   // misal: "Ganjil 2023/2024"
+  semester  String // misal: "Ganjil 2023/2024"
   uh1       Float?
   uh2       Float?
   uh3       Float?
@@ -157,8 +166,8 @@ model Grade {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
   // Seorang siswa hanya punya 1 nilai per mata pelajaran per semester
   @@unique([studentId, subjectId, semester])
@@ -168,7 +177,7 @@ model Grade {
 model Attendance {
   id        String   @id @default(cuid())
   studentId String
-  monthYear String   // "Januari 2026"
+  monthYear String // "Januari 2026"
   hadir     Int
   sakit     Int
   izin      Int
@@ -176,7 +185,7 @@ model Attendance {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   // Seorang siswa hanya punya 1 catatan absensi per bulan per tahun
   @@unique([studentId, monthYear])
@@ -184,7 +193,7 @@ model Attendance {
 }
 
 model Achievement {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   studentId String
   title     String
   level     String

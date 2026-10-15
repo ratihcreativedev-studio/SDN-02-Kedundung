@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { NotificationProvider } from '@/components/ui/notification-provider';
 
 export const metadata: Metadata = {
   title: "SIPANDA - SDN Kedundung 2",
@@ -23,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="id" data-scroll-behavior="smooth">
       <body className="text-text-primary">
-        {children}
+        <NotificationProvider>{children}</NotificationProvider>
       </body>
     </html>
   );

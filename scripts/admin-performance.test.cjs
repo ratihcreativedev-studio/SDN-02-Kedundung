@@ -19,14 +19,15 @@ function load(file, db, mocks = {}) {
 }
 const plain = value => JSON.parse(JSON.stringify(value))
 
-test('dashboard counts every record and requests only the five latest announcement fields', async () => {
-  const counts = { students: 12001, classes: 7, subjects: 6, achievements: 20, announcements: 14, galleries: 19 }
+test('dashboard counts only active students and requests only the five latest announcement fields', async () => {
+  const counts = { students: 12001, classes: 7, subjects: 6, achievements: 20, announcements: 14 }
   const recent = [{ id: 'qa-announcement', title: 'QA', content: 'QA', createdAt: new Date() }]
   let calls = 0
   const db = {
     $queryRaw: async (sql, ...values) => {
       calls++
       assert.equal(values.length, 0, 'Totals query must not interpolate untrusted data')
+      assert.match(sql.join(''), /FROM students WHERE status = 'active'\) AS students/)
       for (const table of Object.keys(counts)) assert.match(sql.join(''), new RegExp('COUNT\\(\\*\\)::int FROM ' + table))
       return [counts]
     },
@@ -38,7 +39,7 @@ test('dashboard counts every record and requests only the five latest announceme
   }
   const { getDashboardSummary } = load('src/features/dashboard/queries.ts', db)
   const result = await getDashboardSummary()
-  assert.deepEqual(plain(result.counts), { students: 12001, classes: 7, subjects: 6, achievements: 20, announcements: 14, galleries: 19 })
+  assert.deepEqual(plain(result.counts), { students: 12001, classes: 7, subjects: 6, achievements: 20, announcements: 14 })
   assert.equal(result.announcements, recent)
   assert.equal(calls, 2)
 })

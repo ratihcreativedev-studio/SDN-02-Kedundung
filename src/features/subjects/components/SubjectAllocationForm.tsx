@@ -1,5 +1,9 @@
 'use client'
 
+import { useNotifiedAction } from '@/components/ui/notification-provider'
+
+import { ConfirmationForm } from '@/components/ui/confirmation-dialog'
+
 import { useActionState } from 'react'
 import { updateSubjectClassesAction } from '../actions'
 
@@ -14,14 +18,15 @@ export function SubjectAllocationForm({
   classes: { id: string; name: string }[]
   selectedClassIds: string[]
 }) {
+  const runAction = useNotifiedAction()
   const [state, formAction, isPending] = useActionState(async (_prev: typeof initialState, formData: FormData) => {
-    const result = await updateSubjectClassesAction(subjectId, formData)
+    const result = await runAction(() => updateSubjectClassesAction(subjectId, formData), 'Alokasi mata pelajaran berhasil disimpan.')
     if (result?.error) return { error: result.error, success: false }
     return { error: '', success: true }
   }, initialState)
 
   return (
-    <form action={formAction} className="space-y-3">
+    <ConfirmationForm confirmation={{ title: 'Simpan data?', description: 'Anda akan menyimpan alokasi mata pelajaran. Pastikan data sudah benar sebelum melanjutkan.', confirmLabel: 'Ya, simpan' }} action={formAction} className="space-y-3">
       <div className="flex flex-wrap gap-2">
         {classes.map((cls) => (
           <label key={cls.id} className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors has-checked:border-primary/30 has-checked:bg-primary/10 has-checked:text-primary">
@@ -37,6 +42,6 @@ export function SubjectAllocationForm({
         {state.success && <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Tersimpan</span>}
         {state.error && <span className="text-xs font-medium text-red-600 dark:text-red-400">{state.error}</span>}
       </div>
-    </form>
+    </ConfirmationForm>
   )
 }

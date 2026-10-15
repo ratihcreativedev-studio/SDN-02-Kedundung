@@ -1,5 +1,9 @@
 'use client'
 
+import { useNotifiedAction } from '@/components/ui/notification-provider'
+
+import { ConfirmationForm } from '@/components/ui/confirmation-dialog'
+
 import { useActionState, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -25,6 +29,7 @@ export function AchievementForm({
     note: string | null
   } | null
 }) {
+  const runAction = useNotifiedAction()
   const router = useRouter()
   const [previewUrl, setPreviewUrl] = useState<string | null>(achievement?.imageUrl || null)
   const initialStudentName = students.find(s => s.id === achievement?.studentId)?.name || ''
@@ -35,7 +40,7 @@ export function AchievementForm({
   const action = achievement ? updateAchievementAction.bind(null, achievement.id) : createAchievementAction
   
   const [state, formAction, isPending] = useActionState(async (_prev: typeof initialState, formData: FormData) => {
-    const result = await action(formData)
+    const result = await runAction(() => action(formData), 'Prestasi berhasil disimpan.')
     if (result?.error) return { error: result.error, success: false }
     router.push('/admin/prestasi')
     return { error: '', success: true }
@@ -53,7 +58,7 @@ export function AchievementForm({
 
   return (
     <div className="section-card p-6 animate-fade-in-up animate-delay-100">
-      <form action={formAction} className="space-y-5">
+      <ConfirmationForm confirmation={{ title: 'Simpan data?', description: 'Anda akan menyimpan prestasi. Pastikan data sudah benar sebelum melanjutkan.', confirmLabel: 'Ya, simpan' }} action={formAction} className="space-y-5">
         {state.error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-900/30 dark:text-red-400">{state.error}</div>}
         <div className="grid gap-5 sm:grid-cols-2">
           <label className="space-y-2 sm:col-span-2 relative">
@@ -160,7 +165,7 @@ export function AchievementForm({
           </button>
           <Link href="/admin/prestasi" className="rounded-xl border border-border bg-white px-5 py-2.5 text-center text-sm font-medium text-text-secondary transition-colors hover:bg-surface-alt hover:text-primary">Batal</Link>
         </div>
-      </form>
+      </ConfirmationForm>
     </div>
   )
 }

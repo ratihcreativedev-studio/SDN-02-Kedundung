@@ -1,19 +1,38 @@
 import { studentService } from '../services'
-import Link from 'next/link'
-import { Pencil, Eye } from 'lucide-react'
-import { DeleteStudentButton } from './DeleteStudentButton'
+import { StudentActions } from './StudentActions'
 import { StudentFilters } from './StudentFilters'
 import { Pagination } from '@/components/Pagination'
+import type { StudentStatus } from '@prisma/client'
+
+const statusLabels: Record<StudentStatus, string> = {
+  active: 'Aktif',
+  inactive: 'Tidak Aktif',
+  graduate: 'Lulus',
+}
+
+const statusStyles: Record<StudentStatus, string> = {
+  active: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+  inactive: 'border-slate-200 bg-slate-100 text-slate-600',
+  graduate: 'border-indigo-200 bg-indigo-50 text-indigo-700',
+}
+
+function StatusBadge({ status }: { status: StudentStatus }) {
+  return <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-medium ${statusStyles[status]}`}>
+    <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
+    {statusLabels[status]}
+  </span>
+}
 
 export async function StudentList({
   searchParams,
 }: {
   searchParams?: { q?: string; sortBy?: string; sortOrder?: string; page?: string }
 }) {
-  const page = Number(searchParams?.page) || 1
+  const requestedPage = Number(searchParams?.page)
+  const page = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1
   const limit = 10
   
-  const { data: students, totalPages } = await studentService.getPaginated({
+  const { data: students, totalPages, total } = await studentService.getPaginated({
     search: searchParams?.q,
     sortBy: searchParams?.sortBy,
     sortOrder: searchParams?.sortOrder as 'asc' | 'desc',
@@ -24,6 +43,7 @@ export async function StudentList({
   return (
     <div>
       <StudentFilters />
+      <p className="mb-4 text-sm text-text-secondary"><span className="font-semibold text-primary">{total}</span> siswa{searchParams?.q ? ' sesuai pencarian' : ' terdaftar'}</p>
       
       <div className="md:hidden">
         {students.length === 0 ? (
@@ -46,18 +66,13 @@ export async function StudentList({
                     <dd className="font-medium text-primary">{student.nisn}</dd>
                   </div>
                   <div className="flex flex-wrap justify-between gap-x-3 gap-y-1">
-                    <dt className="text-text-secondary">Ditambahkan</dt>
-                    <dd className="text-text-secondary">{new Date(student.createdAt).toLocaleDateString('id-ID')}</dd>
+                    <dt className="text-text-secondary">Status Siswa</dt>
+                    <dd className="text-text-secondary"><StatusBadge status={student.status} /></dd>
                   </div>
                 </dl>
-                <div className="mt-3 grid grid-cols-3 gap-2 border-t border-border pt-3">
-                  <Link href={`/admin/data-siswa/${student.id}`} aria-label={`Detail ${student.name}`} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg bg-primary px-2 text-sm font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
-                    <Eye className="h-4 w-4" aria-hidden="true" /> Detail
-                  </Link>
-                  <Link href={`/admin/data-siswa/${student.id}/edit`} aria-label={`Edit ${student.name}`} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-border px-2 text-sm font-semibold text-primary hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
-                    <Pencil className="h-4 w-4" aria-hidden="true" /> Edit
-                  </Link>
-                  <DeleteStudentButton id={student.id} name={student.name} showLabel />
+                <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
+                  <span className="text-xs text-text-muted">Kelola siswa</span>
+                  <StudentActions id={student.id} name={student.name} />
                 </div>
               </li>
             ))}
@@ -67,14 +82,15 @@ export async function StudentList({
 
       <div className="section-card hidden overflow-hidden md:block">
         <div className="overflow-x-auto">
-          <table className="min-w-[720px] w-full text-left text-sm">
-            <thead className="bg-surface-alt text-text-secondary border-b border-border">
+          <table className="min-w-[680px] w-full text-left text-sm">
+            <caption className="sr-only">Data siswa SDN Kedundung 2</caption>
+            <thead className="bg-surface-alt/80 text-text-muted text-xs uppercase tracking-wider border-b border-border">
               <tr>
-                <th className="py-4 px-6 font-semibold">NISN</th>
-                <th className="py-4 px-6 font-semibold">Nama Siswa</th>
-                <th className="py-4 px-6 font-semibold">Kelas</th>
-                <th className="py-4 px-6 font-semibold">Tgl Dibuat</th>
-                <th className="py-4 px-6 text-right font-semibold">Aksi</th>
+                <th scope="col" className="py-4 px-6 font-semibold">NISN</th>
+                <th scope="col" className="py-4 px-6 font-semibold">Nama Siswa</th>
+                <th scope="col" className="py-4 px-6 font-semibold">Kelas</th>
+                <th scope="col" className="py-4 px-6 font-semibold">Status Siswa</th>
+                <th scope="col" className="py-4 px-6 text-right font-semibold">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -87,26 +103,18 @@ export async function StudentList({
               ) : (
                 students.map((student) => (
                   <tr key={student.id} className="hover:bg-surface-alt/50 transition-colors">
-                    <td className="py-4 px-6 font-medium text-primary">{student.nisn}</td>
-                    <td className="py-4 px-6 text-text-secondary">{student.name}</td>
+                    <td className="py-4 px-6 font-mono text-xs tabular-nums text-text-secondary">{student.nisn}</td>
+                    <td className="py-4 px-6 font-semibold text-primary">{student.name}</td>
                     <td className="py-4 px-6">
                       <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
                         {student.class?.name || 'Belum ada kelas'}
                       </span>
                     </td>
                     <td className="py-4 px-6 text-text-secondary">
-                      {new Date(student.createdAt).toLocaleDateString('id-ID')}
+                      <StatusBadge status={student.status} />
                     </td>
                     <td className="py-4 px-6 text-right">
-                      <div className="flex justify-end gap-1">
-                        <Link href={`/admin/data-siswa/${student.id}`} className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-primary transition-colors hover:bg-primary/10 focus-visible:outline-2 focus-visible:outline-primary" title="Detail Siswa" aria-label={`Detail ${student.name}`}>
-                          <Eye className="h-4 w-4" />
-                        </Link>
-                        <Link href={`/admin/data-siswa/${student.id}/edit`} className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-primary transition-colors hover:bg-primary/10 focus-visible:outline-2 focus-visible:outline-primary" title="Edit Siswa" aria-label={`Edit ${student.name}`}>
-                          <Pencil className="h-4 w-4" />
-                        </Link>
-                        <DeleteStudentButton id={student.id} name={student.name} />
-                      </div>
+                      <StudentActions id={student.id} name={student.name} />
                     </td>
                   </tr>
                 ))

@@ -1,5 +1,9 @@
 'use client'
 
+import { useNotifiedAction } from '@/components/ui/notification-provider'
+
+import { ConfirmationForm } from '@/components/ui/confirmation-dialog'
+
 import { useActionState, useRef, useState } from 'react'
 import { uploadAttendanceAction } from '../actions'
 import { UploadCloud, FileSpreadsheet, CheckCircle2 } from 'lucide-react'
@@ -15,8 +19,9 @@ export function AttendanceUploadClient({
   students: { id: string; nisn: string; name: string }[]
   attendances: any[]
 }) {
+  const runAction = useNotifiedAction()
   const [state, formAction, isPending] = useActionState(async (_prev: typeof initialState, formData: FormData) => {
-    const result = await uploadAttendanceAction(formData)
+    const result = await runAction(() => uploadAttendanceAction(formData), 'Absensi siswa berhasil diimpor.')
     if (result?.error) return { error: result.error, success: false }
     return { error: '', success: true }
   }, initialState)
@@ -56,7 +61,7 @@ export function AttendanceUploadClient({
   return (
     <div className="space-y-6 animate-fade-in-up animate-delay-200">
       {/* Upload Zone */}
-      <form action={formAction} className="relative overflow-hidden section-card p-8 flex flex-col items-center justify-center text-center group">
+      <ConfirmationForm confirmation={{ title: 'Simpan data?', description: 'Anda akan menyimpan absensi siswa dari file ini. Pastikan data sudah benar sebelum melanjutkan.', confirmLabel: 'Ya, simpan' }} action={formAction} className="relative overflow-hidden section-card p-8 flex flex-col items-center justify-center text-center group">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 opacity-50"></div>
         <input type="hidden" name="monthYear" value={monthYear} />
         <input type="hidden" name="students" value={JSON.stringify(students)} />
@@ -130,7 +135,7 @@ export function AttendanceUploadClient({
             {state.error && <span className="text-sm font-medium text-red-600 bg-red-50 px-4 py-2 rounded-full animate-fade-in">{state.error}</span>}
           </div>
         </div>
-      </form>
+      </ConfirmationForm>
 
       {/* Read-Only Data View */}
       {hasData && (

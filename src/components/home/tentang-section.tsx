@@ -1,9 +1,13 @@
 import Image from "next/image";
 import { Eye, Target } from "lucide-react";
 
-import { misiPoints } from "@/data";
+import initialProfile from "@/data/school-profile.json";
+import { schoolProfileService } from "@/features/school-profile/services";
 
-export function TentangSection() {
+export async function TentangSection() {
+  const profile = await schoolProfileService.getProfile();
+  const data = profile ?? initialProfile;
+  const missions = (data.mission || '').split('\n').map(point => point.trim()).filter(Boolean);
   return (
     <section id="visi-misi" className="bg-white/70 py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -19,21 +23,7 @@ export function TentangSection() {
               SD Negeri Kedundung 2
             </h2>
             <div className="space-y-4 text-lg text-text-secondary leading-relaxed">
-              <p>
-                SD Negeri Kedundung 2 merupakan institusi pendidikan dasar yang berada di wilayah perifer Kota Mojokerto, tepatnya di Kelurahan Kedundung yang berbatasan langsung dengan Kabupaten Mojokerto. Posisi strategis ini menjadikan sekolah sebagai salah satu pusat layanan pendidikan yang berperan penting dalam menjembatani kebutuhan pendidikan masyarakat di kawasan perbatasan.
-              </p>
-              <p>
-                Dalam pelaksanaan proses pendidikan, SD Negeri Kedundung 2 tidak hanya berfokus pada kegiatan intrakurikuler dan kokurikuler, tetapi juga secara aktif mengembangkan berbagai program ekstrakurikuler sebagai sarana optimalisasi potensi peserta didik. Beragam kegiatan yang disediakan meliputi bidang olahraga, seni, dan keagamaan, seperti bola voli, sepak takraw, futsal, karate, tari, seni rupa, samroh, pantomim, pramuka, serta program Baca Tulis Al-Qur’an (BTQ) yang dikenal dengan istilah &ldquo;Ning Ita di sekolah&rdquo;.
-              </p>
-              <p>
-                Komitmen terhadap pengembangan potensi nonakademik telah membuahkan hasil yang nyata, ditandai dengan berbagai capaian prestasi di bidang olahraga dan seni. Sementara itu, dalam ranah akademik, sekolah terus melakukan penguatan melalui berbagai strategi peningkatan mutu pembelajaran guna memastikan peserta didik mampu bersaing secara optimal dengan sekolah lain.
-              </p>
-              <p>
-                Sebagai bagian dari upaya pembentukan karakter, SD Negeri Kedundung 2 juga mengimplementasikan berbagai program pembiasaan yang terstruktur dan berkelanjutan, seperti kegiatan tematik harian, &ldquo;Jumat Berisi Ning Aksi&rdquo;, KITA, Mager Bersama, Laciku, serta program-program inovatif lainnya yang berorientasi pada penguatan nilai-nilai positif peserta didik.
-              </p>
-              <p>
-                Dengan semangat peningkatan kualitas yang berkesinambungan, SD Negeri Kedundung 2 senantiasa berupaya mengoptimalkan layanan pendidikan secara holistik. Upaya ini diarahkan untuk mewujudkan lingkungan belajar yang unggul, adaptif, dan berdaya saing, serta mampu mencetak generasi yang berkarakter, kompeten, dan berintegritas.
-              </p>
+              {data.description.split(/\n\s*\n/).map((paragraph, index) => <p key={index} className="whitespace-pre-line">{paragraph}</p>)}
             </div>
           </div>
 
@@ -76,8 +66,7 @@ export function TentangSection() {
                 <h3 className="text-2xl font-bold text-primary">Visi</h3>
               </div>
               <p className="text-lg font-medium leading-relaxed text-text-secondary">
-                &ldquo;Terwujudnya murid yang berkarakter sebagai pembelajar
-                sepanjang hayat yang peduli lingkungan, inovatif, dan berprestasi.&rdquo;
+                {data.vision}
               </p>
             </div>
 
@@ -90,7 +79,7 @@ export function TentangSection() {
                 <h3 className="text-2xl font-bold text-primary">Misi</h3>
               </div>
               <ul className="space-y-4">
-                {misiPoints.map((point, i) => (
+                {missions.map((point, i) => (
                   <li key={point} className="flex items-start gap-4">
                     <span className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
                       {i + 1}

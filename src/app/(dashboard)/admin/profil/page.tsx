@@ -11,7 +11,7 @@ export default async function ProfilPage() {
   const profile = await schoolProfileService.getProfile()
 
   return (
-    <div className="max-w-3xl space-y-4 sm:space-y-6">
+    <div className="w-full space-y-4 sm:space-y-6">
       <PageHeader
         title="Profil Sekolah"
         description="Ubah informasi dasar SDN Kedundung 2."

@@ -1,5 +1,9 @@
 'use client'
 
+import { useNotifiedAction } from '@/components/ui/notification-provider'
+
+import { useConfirmation } from '@/components/ui/confirmation-dialog'
+
 import { useState } from 'react'
 import { FileText, Upload, Trash2, Loader2, CheckCircle2 } from 'lucide-react'
 import { uploadIjazahAction, deleteIjazahAction } from '../actions'
@@ -10,6 +14,8 @@ interface IjazahUploaderProps {
 }
 
 export function IjazahUploader({ studentId, existingUrl }: IjazahUploaderProps) {
+  const runAction = useNotifiedAction()
+  const confirmAction = useConfirmation()
   const [file, setFile] = useState<File | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -35,6 +41,7 @@ export function IjazahUploader({ studentId, existingUrl }: IjazahUploaderProps) 
 
   const handleUpload = async () => {
     if (!file) return
+    if (!await confirmAction({ title: existingUrl ? 'Ganti ijazah?' : 'Upload ijazah?', description: `Unggah ${file.name} sebagai ijazah siswa?${existingUrl ? ' File ini akan menggantikan ijazah sebelumnya.' : ''}`, confirmLabel: 'Ya, unggah' })) return
 
     setIsLoading(true)
     setError(null)
@@ -45,7 +52,7 @@ export function IjazahUploader({ studentId, existingUrl }: IjazahUploaderProps) 
       const formData = new FormData()
       formData.append('file', file)
 
-      const result = await uploadIjazahAction(studentId, formData)
+      const result = await runAction(() => uploadIjazahAction(studentId, formData), 'Ijazah berhasil diunggah.')
 
       if (result.error) {
         setError(result.error)
@@ -64,7 +71,7 @@ export function IjazahUploader({ studentId, existingUrl }: IjazahUploaderProps) 
   }
 
   const handleDelete = async () => {
-    if (!confirm('Apakah Anda yakin ingin menghapus ijazah ini?')) return
+    if (!await confirmAction({ title: 'Hapus data?', description: 'Apakah Anda yakin ingin menghapus ijazah ini?', confirmLabel: 'Ya, hapus', destructive: true })) return
 
     setIsDeleting(true)
     setError(null)
@@ -72,7 +79,7 @@ export function IjazahUploader({ studentId, existingUrl }: IjazahUploaderProps) 
     setDeleteSuccess(false)
 
     try {
-      const result = await deleteIjazahAction(studentId)
+      const result = await runAction(() => deleteIjazahAction(studentId), 'Ijazah berhasil dihapus.')
 
       if (result.error) {
         setError(result.error)
@@ -87,7 +94,7 @@ export function IjazahUploader({ studentId, existingUrl }: IjazahUploaderProps) 
   }
 
   return (
-    <div className="section-card p-6 h-fit mt-6">
+    <div id="ijazah" className="section-card p-6 h-fit mt-6 scroll-mt-24">
       <div className="flex items-center gap-3 mb-4 pb-3 border-b border-border">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600">
           <FileText size={16} />

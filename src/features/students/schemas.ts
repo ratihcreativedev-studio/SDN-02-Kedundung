@@ -5,7 +5,10 @@ const optionalString = z.string().optional().transform(v => v === "" ? null : v)
 export const studentSchema = z.object({
   nisn: z.string().min(1, 'NISN wajib diisi'),
   name: z.string().min(1, 'Nama wajib diisi'),
-  classId: z.string().min(1, 'Kelas wajib dipilih'),
+  classId: optionalString.nullable(),
+  status: z.enum(['active', 'inactive', 'graduate']).optional(),
+  graduationDate: z.union([z.iso.date(), z.literal('')]).optional()
+    .transform(value => value === undefined ? undefined : value ? new Date(`${value}T00:00:00.000Z`) : null),
   
   nipd: optionalString,
   gender: optionalString,
@@ -22,3 +25,8 @@ export const studentSchema = z.object({
 })
 
 export type StudentInput = z.infer<typeof studentSchema>
+
+export const studentNoteSchema = z.object({
+  note: z.string().trim().max(5000, 'Catatan maksimal 5.000 karakter')
+    .transform(value => value || null),
+})

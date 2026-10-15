@@ -16,6 +16,7 @@ export async function updateSchoolProfileAction(formData: FormData) {
     revalidatePath('/admin/profil')
     revalidatePath('/')
     revalidatePath('/tentang-sekolah')
+    revalidatePath('/(public)', 'layout')
     return { success: true }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Terjadi kesalahan' }

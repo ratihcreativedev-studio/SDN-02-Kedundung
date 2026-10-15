@@ -57,6 +57,17 @@ export const studentQueries = {
       include: { class: true },
     })
   },
+  findByIdentifier: (identifier: string) => {
+    return db.student.findFirst({
+      where: {
+        OR: [
+          { nisn: identifier },
+          { nipd: identifier },
+        ],
+      },
+      include: { class: true },
+    })
+  },
   create: (data: StudentInput) => {
     return db.student.create({ data })
   },
@@ -71,4 +82,9 @@ export const studentQueries = {
       where: { id },
     })
   },
+  updateNote: (id: string, note: string | null) => db.student.update({
+    where: { id },
+    data: { note },
+    select: { nisn: true, nipd: true },
+  }),
 }

@@ -1,9 +1,14 @@
 'use client'
 
+import { useNotifiedAction } from '@/components/ui/notification-provider'
+
+import { ConfirmationForm } from '@/components/ui/confirmation-dialog'
+
 import { useActionState } from 'react'
 import { createStudentAction, updateStudentAction } from '../actions'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import type { StudentStatus } from '@prisma/client'
 
 const initialState = { error: '', success: false }
 
@@ -13,7 +18,9 @@ type StudentFormProps = {
     id: string
     nisn: string
     name: string
-    classId: string
+    classId: string | null
+    status?: StudentStatus
+    graduationDate?: Date | null
     nipd?: string | null
     gender?: string | null
     birthPlace?: string | null
@@ -30,11 +37,12 @@ type StudentFormProps = {
 }
 
 export function StudentForm({ classes, student }: StudentFormProps) {
+  const runAction = useNotifiedAction()
   const router = useRouter()
   const action = student ? updateStudentAction.bind(null, student.id) : createStudentAction
   const [state, formAction, isPending] = useActionState(
     async (prevState: typeof initialState, formData: FormData) => {
-      const result = await action(formData)
+      const result = await runAction(() => action(formData), 'Data siswa berhasil disimpan.')
       if (result?.error) {
         return { error: result.error, success: false }
       }
@@ -53,7 +61,7 @@ export function StudentForm({ classes, student }: StudentFormProps) {
 
   return (
     <div className="section-card p-6 sm:p-8 animate-fade-in-up animate-delay-100">
-      <form action={formAction} className="space-y-8">
+      <ConfirmationForm confirmation={{ title: 'Simpan data?', description: 'Anda akan menyimpan data siswa. Pastikan data sudah benar sebelum melanjutkan.', confirmLabel: 'Ya, simpan' }} action={formAction} className="space-y-8">
         {state?.error && (
           <div className="p-4 text-sm text-red-600 bg-red-50 rounded-xl border border-red-200 dark:bg-red-900/30 dark:border-red-900/50 dark:text-red-400">
             {state.error}
@@ -97,22 +105,35 @@ export function StudentForm({ classes, student }: StudentFormProps) {
 
               <div className="space-y-2 sm:col-span-2">
                 <label htmlFor="classId" className="block text-sm font-medium text-primary">
-                  Kelas <span className="text-red-500">*</span>
+                  Kelas
                 </label>
                 <select
                   id="classId"
                   name="classId"
-                  required
                   defaultValue={student?.classId ?? ''}
                   className="w-full h-11.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 >
-                  <option value="">-- Pilih Kelas --</option>
+                  <option value="">-- Tanpa Kelas --</option>
                   {classes.map((cls) => (
                     <option key={cls.id} value={cls.id}>
                       {cls.name}
                     </option>
                   ))}
                 </select>
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="status" className="block text-sm font-medium text-primary">Status Siswa</label>
+                <select id="status" name="status" defaultValue={student?.status ?? 'active'} required className="w-full h-11.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                  <option value="active">Aktif</option>
+                  <option value="inactive">Tidak Aktif</option>
+                  <option value="graduate">Lulus</option>
+                </select>
+                <p className="text-xs text-text-muted">Siswa berstatus Lulus otomatis tampil di menu Alumni.</p>
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="graduationDate" className="block text-sm font-medium text-primary">Tanggal Kelulusan</label>
+                <input id="graduationDate" name="graduationDate" type="date" defaultValue={student?.graduationDate ? new Date(student.graduationDate).toISOString().split('T')[0] : ''} className="w-full h-11.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:outline-none focus:ring-1 focus:ring-primary" />
+                <p className="text-xs text-text-muted">Isi untuk siswa yang sudah lulus, jika tanggalnya tersedia.</p>
               </div>
             </div>
           </div>
@@ -320,7 +341,7 @@ export function StudentForm({ classes, student }: StudentFormProps) {
             Batal
           </Link>
         </div>
-      </form>
+      </ConfirmationForm>
     </div>
   )
 }

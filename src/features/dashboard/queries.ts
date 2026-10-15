@@ -6,7 +6,6 @@ type DashboardCounts = {
   subjects: number
   achievements: number
   announcements: number
-  galleries: number
 }
 
 export async function getDashboardSummary() {
@@ -14,12 +13,11 @@ export async function getDashboardSummary() {
   const [totals, announcements] = await Promise.all([
     db.$queryRaw<DashboardCounts[]>`
       SELECT
-        (SELECT COUNT(*)::int FROM students) AS students,
+        (SELECT COUNT(*)::int FROM students WHERE status = 'active') AS students,
         (SELECT COUNT(*)::int FROM classes) AS classes,
         (SELECT COUNT(*)::int FROM subjects) AS subjects,
         (SELECT COUNT(*)::int FROM achievements) AS achievements,
-        (SELECT COUNT(*)::int FROM announcements) AS announcements,
-        (SELECT COUNT(*)::int FROM galleries) AS galleries
+        (SELECT COUNT(*)::int FROM announcements) AS announcements
     `,
     db.announcement.findMany({
       orderBy: { createdAt: 'desc' },

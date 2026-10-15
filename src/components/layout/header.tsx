@@ -1,5 +1,9 @@
 'use client'
 
+import { useNotifiedAction } from '@/components/ui/notification-provider'
+
+import { useConfirmation } from '@/components/ui/confirmation-dialog'
+
 import { Menu, LogOut, ChevronRight } from 'lucide-react'
 import { useRouter, usePathname } from 'next/navigation'
 import { logoutAction } from '@/features/auth/actions'
@@ -9,6 +13,7 @@ function getPageTitle(pathname: string): string {
   const map: Record<string, string> = {
     '/admin': 'Dashboard',
     '/admin/data-siswa': 'Data Siswa',
+    '/admin/alumni': 'Data Alumni',
     '/admin/kelas': 'Data Kelas',
     '/admin/guru': 'Guru & Staff',
     '/admin/mata-pelajaran': 'Mata Pelajaran',
@@ -16,7 +21,6 @@ function getPageTitle(pathname: string): string {
     '/admin/nilai': 'Daftar Nilai',
     '/admin/prestasi': 'Prestasi',
     '/admin/pengumuman': 'Pengumuman',
-    '/admin/galeri': 'Galeri',
     '/admin/profil': 'Profil Sekolah',
   }
   // Check exact match first
@@ -39,13 +43,16 @@ export function Header({
   isMenuOpen?: boolean
   onMenuClick: () => void
 }) {
+  const runAction = useNotifiedAction()
+  const confirmAction = useConfirmation()
   const router = useRouter()
   const pathname = usePathname()
   const pageTitle = getPageTitle(pathname)
 
   const handleLogout = async () => {
-    await logoutAction()
-    router.push('/login')
+    if (!await confirmAction({ title: 'Keluar dari dashboard?', description: 'Anda akan keluar dari akun admin. Pastikan perubahan data sudah disimpan.', confirmLabel: 'Ya, keluar' })) return
+    const result = await runAction(() => logoutAction(), 'Anda berhasil keluar dari akun admin.')
+    if (result.success) router.push('/login')
   }
 
   return (

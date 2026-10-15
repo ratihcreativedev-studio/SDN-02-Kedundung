@@ -1,5 +1,9 @@
 'use client'
 
+import { useNotifiedAction } from '@/components/ui/notification-provider'
+
+import { ConfirmationForm } from '@/components/ui/confirmation-dialog'
+
 import { useActionState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -18,10 +22,11 @@ type TeacherFormProps = {
 }
 
 export function TeacherForm({ teacher }: TeacherFormProps) {
+  const runAction = useNotifiedAction()
   const router = useRouter()
   const action = teacher ? updateTeacherAction.bind(null, teacher.id) : createTeacherAction
   const [state, formAction, isPending] = useActionState(async (_prev: typeof initialState, formData: FormData) => {
-    const result = await action(formData)
+    const result = await runAction(() => action(formData), 'Data guru dan staf berhasil disimpan.')
     if (result?.error) return { error: result.error, success: false }
     router.push('/admin/guru')
     return { error: '', success: true }
@@ -29,7 +34,7 @@ export function TeacherForm({ teacher }: TeacherFormProps) {
 
   return (
     <div className="section-card p-6 animate-fade-in-up animate-delay-100">
-      <form action={formAction} className="space-y-5">
+      <ConfirmationForm confirmation={{ title: 'Simpan data?', description: 'Anda akan menyimpan data guru dan staf. Pastikan data sudah benar sebelum melanjutkan.', confirmLabel: 'Ya, simpan' }} action={formAction} className="space-y-5">
         {state.error && (
           <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-900/30 dark:text-red-400">
             {state.error}
@@ -65,7 +70,7 @@ export function TeacherForm({ teacher }: TeacherFormProps) {
             Batal
           </Link>
         </div>
-      </form>
+      </ConfirmationForm>
     </div>
   )
 }

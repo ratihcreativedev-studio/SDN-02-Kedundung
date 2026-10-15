@@ -8,7 +8,6 @@ import {
   CalendarCheck,
   ClipboardList,
   GraduationCap,
-  Image as ImageIcon,
   LayoutDashboard,
   Loader2,
   Megaphone,
@@ -30,6 +29,7 @@ const navSections = [
     label: 'Akademik',
     items: [
       { name: 'Siswa', href: '/admin/data-siswa', icon: GraduationCap },
+      { name: 'Alumni', href: '/admin/alumni', icon: GraduationCap },
       { name: 'Kelas', href: '/admin/kelas', icon: School },
       { name: 'Guru & Staff', href: '/admin/guru', icon: Users },
       { name: 'Mata Pelajaran', href: '/admin/mata-pelajaran', icon: BookOpen },
@@ -47,7 +47,6 @@ const navSections = [
     label: 'Informasi',
     items: [
       { name: 'Pengumuman', href: '/admin/pengumuman', icon: Megaphone },
-      { name: 'Galeri', href: '/admin/galeri', icon: ImageIcon },
       { name: 'Profil Sekolah', href: '/admin/profil', icon: School },
     ],
   },

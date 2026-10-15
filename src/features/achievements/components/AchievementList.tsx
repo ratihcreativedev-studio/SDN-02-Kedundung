@@ -42,7 +42,7 @@ export async function AchievementList({
                   <tr key={item.id} className="hover:bg-surface-alt/50 transition-colors">
                     <td className="px-6 py-4">
                       <p className="font-medium text-primary">{item.student.name}</p>
-                      <p className="text-xs text-text-secondary mt-1">{item.student.class.name}</p>
+                      <p className="text-xs text-text-secondary mt-1">{item.student.class?.name ?? 'Tanpa kelas'}</p>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">

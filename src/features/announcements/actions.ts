@@ -25,6 +25,8 @@ export async function createAnnouncementAction(formData: FormData) {
 
     await announcementService.create({ ...parsed.data, thumbnail }, email)
     revalidatePath('/admin/pengumuman')
+    revalidatePath('/admin')
+    revalidatePath('/informasi')
     revalidatePath('/') // Revalidate halaman utama
     return { success: true }
   } catch (err) {
@@ -47,15 +49,18 @@ export async function updateAnnouncementAction(id: string, formData: FormData) {
     let thumbnail = existingData.thumbnail || ''
 
     if (image && image.size > 0) {
-      // Hapus gambar lama jika ada
-      if (existingData.thumbnail) {
-        await storageService.deleteImage(existingData.thumbnail)
-      }
       thumbnail = await storageService.uploadImage(image, 'pengumuman')
     }
 
     await announcementService.update(id, { ...parsed.data, thumbnail })
+    if (existingData.thumbnail && thumbnail !== existingData.thumbnail) {
+      try { await storageService.deleteImage(existingData.thumbnail) } catch { /* Saved content remains valid if old image cleanup fails. */ }
+    }
+    revalidatePath(`/informasi/${id}`)
+    revalidatePath(`/admin/pengumuman/${id}/edit`)
     revalidatePath('/admin/pengumuman')
+    revalidatePath('/admin')
+    revalidatePath('/informasi')
     revalidatePath('/')
     return { success: true }
   } catch (err) {
@@ -68,12 +73,14 @@ export async function deleteAnnouncementAction(id: string) {
     await requireAdminEmail()
     const existingData = await announcementService.getById(id)
     
-    if (existingData?.thumbnail) {
-      await storageService.deleteImage(existingData.thumbnail)
-    }
-
     await announcementService.delete(id)
+    if (existingData?.thumbnail) {
+      try { await storageService.deleteImage(existingData.thumbnail) } catch { /* Image cleanup must not block removing a published announcement. */ }
+    }
+    revalidatePath(`/informasi/${id}`)
     revalidatePath('/admin/pengumuman')
+    revalidatePath('/admin')
+    revalidatePath('/informasi')
     revalidatePath('/')
     return { success: true }
   } catch (err) {
@@ -85,9 +92,11 @@ export async function publishAnnouncementAction(id: string) {
   try {
     await requireAdminEmail()
     await announcementService.publish(id)
+    revalidatePath(`/informasi/${id}`)
     revalidatePath('/admin/pengumuman')
-    revalidatePath('/')
+    revalidatePath('/admin')
     revalidatePath('/informasi')
+    revalidatePath('/')
     return { success: true }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Terjadi kesalahan' }

@@ -13,6 +13,7 @@ export async function generateMetadata({ params }: PageParams) {
   const { id } = await params;
   try {
     const announcement = await announcementService.getById(id);
+    if (announcement.status !== "PUBLISHED") return { title: "Informasi Tidak Ditemukan | SIPANDA" };
     return {
       title: `${announcement.title} | SIPANDA - SDN Kedundung 2`,
       description: announcement.content.slice(0, 160).replace(/\s+/g, " "),

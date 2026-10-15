@@ -20,8 +20,8 @@ export function StudentSearchByNisn() {
   return (
     <div className="mb-12">
       <div className="section-card p-6 bg-white border border-border shadow-sm rounded-2xl">
-        <h2 className="text-xl font-bold text-primary mb-2">Cari Data Siswa</h2>
-        <p className="text-sm text-text-secondary mb-6">Masukkan NISN siswa untuk melihat data akademik dan mengunduh ijazah (jika tersedia).</p>
+        <h2 className="text-xl font-bold text-primary mb-2">Cari Data Siswa (NIM / NISN)</h2>
+        <p className="text-sm text-text-secondary mb-6">Masukkan NIM atau NISN siswa untuk melihat data akademik, rekap absensi, daftar nilai, dan mengunduh ijazah.</p>
         
         <form onSubmit={handleSearch} className="flex gap-3">
           <div className="relative flex-1">
@@ -32,7 +32,7 @@ export function StudentSearchByNisn() {
               type="text"
               value={nisn}
               onChange={(e) => setNisn(e.target.value)}
-              placeholder="Masukkan NISN..."
+              placeholder="Masukkan NIM atau NISN siswa..."
               className="block w-full pl-10 pr-3 py-3 border border-border rounded-xl bg-surface-alt/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               disabled={isLoading}
             />

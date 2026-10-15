@@ -15,14 +15,7 @@ type NavItem = {
 const navItems: NavItem[] = [
   { href: "/", label: "Beranda" },
   { href: "/#visi-misi", label: "Tentang Sekolah" },
-  {
-    label: "Akademik",
-    children: [
-      { href: "/data-siswa", label: "Data Siswa" },
-      { href: "/absensi", label: "Absensi" },
-      { href: "/daftar-nilai", label: "Daftar Nilai" },
-    ],
-  },
+  { href: "/data-siswa", label: "Data Siswa" },
   {
     label: "Program Sekolah",
     children: [
@@ -240,7 +233,7 @@ export function Navbar() {
                               href={child.href}
                               onClick={() => setIsOpen(false)}
                               className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${isChildActive
-                                ? "bg-primary !text-white"
+                                ? "bg-primary text-white!"
                                 : "text-text-secondary hover:bg-primary/5 hover:text-primary"
                                 }`}
                             >
@@ -260,7 +253,7 @@ export function Navbar() {
                   href={item.href!}
                   onClick={() => setIsOpen(false)}
                   className={`flex items-center gap-3 rounded-xl px-5 py-3.5 text-base font-semibold transition-all ${isActive
-                    ? "bg-primary !text-white"
+                    ? "bg-primary text-white!"
                     : "text-text-secondary hover:bg-primary/5 hover:text-primary"
                     }`}
                 >

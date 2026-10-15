@@ -79,6 +79,8 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
             <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-primary/10 text-primary border border-primary/20">
               {student.class?.name || 'Belum ada kelas'}
             </span>
+            <p className="mt-3 text-sm font-medium text-text-secondary">Status: {{ active: 'Aktif', inactive: 'Tidak Aktif', graduate: 'Lulus' }[student.status]}</p>
+            {student.graduationDate && <p className="mt-1 text-xs text-text-muted">Tanggal kelulusan: {student.graduationDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}</p>}
           </div>
 
           {/* Average Grades Card */}

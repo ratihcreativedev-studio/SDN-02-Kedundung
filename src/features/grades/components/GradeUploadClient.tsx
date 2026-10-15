@@ -1,5 +1,9 @@
 'use client'
 
+import { useNotifiedAction } from '@/components/ui/notification-provider'
+
+import { ConfirmationForm } from '@/components/ui/confirmation-dialog'
+
 import { useActionState, useRef, useState } from 'react'
 import { uploadGradesAction } from '../actions'
 import { UploadCloud, FileSpreadsheet, CheckCircle2 } from 'lucide-react'
@@ -17,8 +21,9 @@ export function GradeUploadClient({
   students: { id: string; nisn: string; name: string }[]
   gradeMap: Record<string, any>
 }) {
+  const runAction = useNotifiedAction()
   const [state, formAction, isPending] = useActionState(async (_prev: typeof initialState, formData: FormData) => {
-    const result = await uploadGradesAction(formData)
+    const result = await runAction(() => uploadGradesAction(formData), 'Nilai siswa berhasil diimpor.')
     if (result?.error) return { error: result.error, success: false }
     return { error: '', success: true }
   }, initialState)
@@ -58,7 +63,7 @@ export function GradeUploadClient({
   return (
     <div className="space-y-6 animate-fade-in-up animate-delay-200">
       {/* Upload Zone */}
-      <form action={formAction} className="section-card p-6 flex flex-col items-center justify-center text-center">
+      <ConfirmationForm confirmation={{ title: 'Simpan data?', description: 'Anda akan menyimpan nilai siswa dari file ini. Pastikan data sudah benar sebelum melanjutkan.', confirmLabel: 'Ya, simpan' }} action={formAction} className="section-card p-6 flex flex-col items-center justify-center text-center">
         <input type="hidden" name="subjectId" value={subjectId} />
         <input type="hidden" name="semester" value={semester} />
         <input type="hidden" name="students" value={JSON.stringify(students)} />
@@ -123,7 +128,7 @@ export function GradeUploadClient({
           {state.success && <span className="flex items-center gap-2 text-sm font-medium text-emerald-600"><CheckCircle2 size={16}/> Data nilai berhasil diperbarui.</span>}
           {state.error && <span className="text-sm font-medium text-red-600">{state.error}</span>}
         </div>
-      </form>
+      </ConfirmationForm>
 
       {/* Read-Only Data View */}
       {hasData && (

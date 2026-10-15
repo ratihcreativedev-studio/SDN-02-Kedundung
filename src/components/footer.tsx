@@ -1,8 +1,12 @@
+import initialProfile from "@/data/school-profile.json";
+import { schoolProfileService } from "@/features/school-profile/services";
 import Link from "next/link";
 import Image from "next/image";
 import { MapPin, Mail, ArrowUpRight, Phone } from "lucide-react";
 
-export function Footer() {
+export async function Footer() {
+  const profile = await schoolProfileService.getProfile();
+  const data = profile ?? initialProfile;
   return (
     <footer id="kontak" className="relative overflow-hidden bg-primary text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(212,168,67,0.18),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent)]" />
@@ -33,11 +37,11 @@ export function Footer() {
             <div className="space-y-3">
               <div className="flex min-w-0 items-center gap-2.5 text-sm text-white/70">
                 <Mail size={16} className="shrink-0 text-secondary" />
-                <span className="break-all">sdnkedundung2mojokerto@gmail.com</span>
+                <span className="break-all">{data.contactEmail}</span>
               </div>
               <div className="flex min-w-0 items-center gap-2.5 text-sm text-white/70">
                 <Phone size={16} className="shrink-0 text-secondary" />
-                <span>0812-1650-3267 (Yatik Hartini, S.Pd, M.Pd)</span>
+                <span>{data.contactPhone}</span>
               </div>
             </div>
           </div>
@@ -71,8 +75,7 @@ export function Footer() {
               <ul className="space-y-3 text-sm">
                 {[
                   { label: "Data Siswa", href: "/data-siswa" },
-                  { label: "Absensi", href: "/absensi" },
-                  { label: "Daftar Nilai", href: "/daftar-nilai" },
+                  { label: "Prestasi Siswa", href: "/prestasi" },
                   { label: "Gerakan 7 KAIH", href: "/gerakan-7kaih" },
                   { label: "Tata Tertib", href: "/tata-tertib" },
                 ].map((link) => (
@@ -107,7 +110,7 @@ export function Footer() {
             <div className="flex items-start gap-2.5 text-xs leading-relaxed text-white/60">
               <MapPin size={14} className="mt-0.5 shrink-0 text-secondary" />
               <span>
-                Jl. Empunala No.404, Mergelo, Kedundung, Kec. Magersari, Kota Mojokerto, Jawa Timur 61316
+                {data.address}
               </span>
             </div>
           </div>

@@ -19,7 +19,7 @@ export default async function TentangSekolahPage() {
         <section className="page-hero">
           <span className="page-eyebrow">Tentang Sekolah</span>
           <h1 className="page-title">SD Negeri Kedundung 2</h1>
-          <p className="page-description">
+          <p className="page-description whitespace-pre-line">
             {profile?.description ?? 'Profil sekolah belum diisi dari dashboard admin.'}
           </p>
         </section>

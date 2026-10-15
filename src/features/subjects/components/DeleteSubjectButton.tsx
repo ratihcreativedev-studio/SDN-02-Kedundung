@@ -1,11 +1,17 @@
 'use client'
 
+import { useNotifiedAction } from '@/components/ui/notification-provider'
+
+import { useConfirmation } from '@/components/ui/confirmation-dialog'
+
 import { useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Trash2 } from 'lucide-react'
 import { deleteSubjectAction } from '../actions'
 
 export function DeleteSubjectButton({ id, name }: { id: string; name: string }) {
+  const runAction = useNotifiedAction()
+  const confirmAction = useConfirmation()
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
@@ -13,11 +19,11 @@ export function DeleteSubjectButton({ id, name }: { id: string; name: string }) 
     <button
       type="button"
       disabled={isPending}
-      onClick={() => {
-        if (!window.confirm(`Hapus mata pelajaran ${name}?`)) return
+      onClick={async () => {
+        if (!await confirmAction({ title: 'Hapus data?', description: `Hapus mata pelajaran ${name}?`, confirmLabel: 'Ya, hapus', destructive: true })) return
         startTransition(async () => {
-          await deleteSubjectAction(id)
-          router.refresh()
+          const result = await runAction(() => deleteSubjectAction(id), 'Mata pelajaran berhasil dihapus.')
+          if (result.success) router.refresh()
         })
       }}
       className="inline-flex items-center justify-center rounded-md p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 disabled:opacity-50 dark:hover:bg-red-500/10"

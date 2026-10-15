@@ -24,7 +24,7 @@ export const studentService = {
     return student
   },
   async getByNisn(nisn: string) {
-    const student = await studentQueries.findByNisn(nisn)
+    const student = await studentQueries.findByIdentifier(nisn)
     if (!student) throw new Error('Siswa tidak ditemukan')
     return student
   },

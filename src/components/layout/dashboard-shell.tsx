@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+import { ConfirmationProvider } from '@/components/ui/confirmation-dialog'
 import { Header } from '@/components/layout/header'
 import { Sidebar } from '@/components/layout/sidebar'
 
@@ -17,6 +18,7 @@ export function DashboardShell({
   const closeSidebar = useCallback(() => setIsSidebarOpen(false), [])
 
   return (
+    <ConfirmationProvider>
     <div className="admin-shell flex h-dvh overflow-hidden bg-background">
       <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
@@ -28,5 +30,6 @@ export function DashboardShell({
         </main>
       </div>
     </div>
+    </ConfirmationProvider>
   )
 }

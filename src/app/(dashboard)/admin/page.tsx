@@ -1,5 +1,5 @@
 import { getDashboardSummary } from '@/features/dashboard/queries'
-import { FileText, GraduationCap, Image as ImageIcon, Trophy, Users, LayoutDashboard, TrendingUp } from 'lucide-react'
+import { FileText, GraduationCap, Trophy, Users, LayoutDashboard, TrendingUp } from 'lucide-react'
 
 export const metadata = {
   title: 'Dashboard Admin | SIPANDA',
@@ -14,7 +14,6 @@ export default async function DashboardPage() {
     { name: 'Mata Pelajaran', value: counts.subjects, icon: FileText, gradient: 'from-amber-500 to-orange-600', bg: 'bg-amber-50', text: 'text-amber-600' },
     { name: 'Prestasi', value: counts.achievements, icon: Trophy, gradient: 'from-rose-500 to-pink-600', bg: 'bg-rose-50', text: 'text-rose-600' },
     { name: 'Pengumuman', value: counts.announcements, icon: FileText, gradient: 'from-blue-500 to-indigo-600', bg: 'bg-blue-50', text: 'text-blue-600' },
-    { name: 'Galeri', value: counts.galleries, icon: ImageIcon, gradient: 'from-primary-light to-primary', bg: 'bg-primary/5', text: 'text-primary' },
   ]
 
   return (
@@ -38,7 +37,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats Grid - 2 cols on mobile, 3 on tablet+  */}
-      <div className="grid grid-cols-2 gap-2.5 sm:gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-4 md:grid-cols-3 xl:grid-cols-5">
         {stats.map((stat, index) => (
           <div
             key={stat.name}
