@@ -7,7 +7,7 @@ export const attendanceQueries = {
         monthYear,
         student: { classId },
       },
-      include: { student: true },
+      select: { studentId: true, hadir: true, sakit: true, izin: true, alpha: true },
     })
   },
 

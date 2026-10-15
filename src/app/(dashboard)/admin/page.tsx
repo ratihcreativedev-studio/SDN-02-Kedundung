@@ -1,9 +1,4 @@
-import { announcementService } from '@/features/announcements/services'
-import { galleryService } from '@/features/galleries/services'
-import { achievementService } from '@/features/achievements/services'
-import { classQueries } from '@/features/classes/queries'
-import { studentService } from '@/features/students/services'
-import { subjectService } from '@/features/subjects/services'
+import { getDashboardSummary } from '@/features/dashboard/queries'
 import { FileText, GraduationCap, Image as ImageIcon, Trophy, Users, LayoutDashboard, TrendingUp } from 'lucide-react'
 
 export const metadata = {
@@ -11,23 +6,15 @@ export const metadata = {
 }
 
 export default async function DashboardPage() {
-  // Fetch statistics
-  const [announcements, galleries, students, classes, subjects, achievements] = await Promise.all([
-    announcementService.getAll(),
-    galleryService.getAll(),
-    studentService.getAll(),
-    classQueries.findAll(),
-    subjectService.getAll(),
-    achievementService.getAll(),
-  ])
+  const { counts, announcements } = await getDashboardSummary()
 
   const stats = [
-    { name: 'Total Siswa', value: students.length, icon: GraduationCap, gradient: 'from-emerald-500 to-teal-600', bg: 'bg-emerald-50', text: 'text-emerald-600' },
-    { name: 'Total Kelas', value: classes.length, icon: Users, gradient: 'from-violet-500 to-purple-600', bg: 'bg-violet-50', text: 'text-violet-600' },
-    { name: 'Mata Pelajaran', value: subjects.length, icon: FileText, gradient: 'from-amber-500 to-orange-600', bg: 'bg-amber-50', text: 'text-amber-600' },
-    { name: 'Prestasi', value: achievements.length, icon: Trophy, gradient: 'from-rose-500 to-pink-600', bg: 'bg-rose-50', text: 'text-rose-600' },
-    { name: 'Pengumuman', value: announcements.length, icon: FileText, gradient: 'from-blue-500 to-indigo-600', bg: 'bg-blue-50', text: 'text-blue-600' },
-    { name: 'Galeri', value: galleries.length, icon: ImageIcon, gradient: 'from-primary-light to-primary', bg: 'bg-primary/5', text: 'text-primary' },
+    { name: 'Total Siswa', value: counts.students, icon: GraduationCap, gradient: 'from-emerald-500 to-teal-600', bg: 'bg-emerald-50', text: 'text-emerald-600' },
+    { name: 'Total Kelas', value: counts.classes, icon: Users, gradient: 'from-violet-500 to-purple-600', bg: 'bg-violet-50', text: 'text-violet-600' },
+    { name: 'Mata Pelajaran', value: counts.subjects, icon: FileText, gradient: 'from-amber-500 to-orange-600', bg: 'bg-amber-50', text: 'text-amber-600' },
+    { name: 'Prestasi', value: counts.achievements, icon: Trophy, gradient: 'from-rose-500 to-pink-600', bg: 'bg-rose-50', text: 'text-rose-600' },
+    { name: 'Pengumuman', value: counts.announcements, icon: FileText, gradient: 'from-blue-500 to-indigo-600', bg: 'bg-blue-50', text: 'text-blue-600' },
+    { name: 'Galeri', value: counts.galleries, icon: ImageIcon, gradient: 'from-primary-light to-primary', bg: 'bg-primary/5', text: 'text-primary' },
   ]
 
   return (
@@ -88,7 +75,7 @@ export default async function DashboardPage() {
             </div>
           ) : (
             <div className="space-y-2.5 sm:space-y-3">
-              {announcements.slice(0, 5).map((item) => (
+              {announcements.map((item) => (
                 <div
                   key={item.id}
                   className="group flex flex-col gap-2 rounded-xl border border-border/60 bg-white p-3 sm:p-4 transition-all hover:border-primary/20 hover:shadow-sm sm:flex-row sm:items-start sm:justify-between"

@@ -4,55 +4,35 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import {
-  Menu,
-  X,
-  GraduationCap,
-  Users,
-  ClipboardList,
-  FileText,
-  Heart,
-  BookOpen,
-  Trophy,
-  Home,
-  Info,
-  Bell,
-  Phone,
-  ChevronDown,
-  Star,
-  type LucideIcon,
-} from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 
 type NavItem = {
   href?: string;
   label: string;
-  icon: LucideIcon;
-  children?: { href: string; label: string; icon: LucideIcon }[];
+  children?: { href: string; label: string }[];
 };
 
 const navItems: NavItem[] = [
-  { href: "/", label: "Beranda", icon: Home },
-  { href: "/#visi-misi", label: "Tentang Sekolah", icon: Info },
+  { href: "/", label: "Beranda" },
+  { href: "/#visi-misi", label: "Tentang Sekolah" },
   {
     label: "Akademik",
-    icon: GraduationCap,
     children: [
-      { href: "/data-siswa", label: "Data Siswa", icon: Users },
-      { href: "/absensi", label: "Absensi", icon: ClipboardList },
-      { href: "/daftar-nilai", label: "Daftar Nilai", icon: FileText },
+      { href: "/data-siswa", label: "Data Siswa" },
+      { href: "/absensi", label: "Absensi" },
+      { href: "/daftar-nilai", label: "Daftar Nilai" },
     ],
   },
   {
     label: "Program Sekolah",
-    icon: Star,
     children: [
-      { href: "/prestasi", label: "Prestasi", icon: Trophy },
-      { href: "/gerakan-7kaih", label: "7 KAIH", icon: Heart },
-      { href: "/tata-tertib", label: "Tata Tertib", icon: BookOpen },
+      { href: "/prestasi", label: "Prestasi" },
+      { href: "/gerakan-7kaih", label: "7 KAIH" },
+      { href: "/tata-tertib", label: "Tata Tertib" },
     ],
   },
-  { href: "/informasi", label: "Informasi", icon: Bell },
-  { href: "/#kontak", label: "Kontak", icon: Phone },
+  { href: "/informasi", label: "Informasi" },
+  { href: "/#kontak", label: "Kontak" },
 ];
 
 export function Navbar() {

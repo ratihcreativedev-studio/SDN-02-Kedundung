@@ -9,7 +9,7 @@ export const metadata = {
 }
 
 export default async function TambahSiswaPage() {
-  const classes = await classQueries.findAll()
+  const classes = await classQueries.findOptions()
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in-up">

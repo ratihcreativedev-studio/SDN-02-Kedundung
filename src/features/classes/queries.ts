@@ -2,6 +2,10 @@ import { db } from '@/lib/db'
 import type { ClassInput } from './schemas'
 
 export const classQueries = {
+  findOptions: () => db.class.findMany({
+    select: { id: true, name: true },
+    orderBy: { name: 'asc' },
+  }),
   findAll: () => {
     return db.class.findMany({
       include: {

@@ -24,6 +24,8 @@ dist/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.*
+!.env.example
 
 # ==========================================
 # Debug Logs
@@ -38,6 +40,7 @@ pnpm-debug.log*
 # ==========================================
 .vscode/
 .idea/
+.antigravitycli/
 *.swp
 *.swo
 *~
@@ -55,6 +58,7 @@ Desktop.ini
 # ==========================================
 coverage/
 .nyc_output/
+/docs/qa-admin/
 
 # ==========================================
 # TypeScript

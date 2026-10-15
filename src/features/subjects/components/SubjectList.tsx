@@ -6,7 +6,7 @@ import { DeleteSubjectButton } from './DeleteSubjectButton'
 import { SubjectAllocationForm } from './SubjectAllocationForm'
 
 export async function SubjectList() {
-  const [subjects, classes] = await Promise.all([subjectService.getAll(), classQueries.findAll()])
+  const [subjects, classes] = await Promise.all([subjectService.getAll(), classQueries.findOptions()])
 
   return (
     <div className="space-y-4">

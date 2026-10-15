@@ -2,6 +2,10 @@ import { db } from '@/lib/db'
 import type { SubjectInput } from './schemas'
 
 export const subjectQueries = {
+  findOptions: () => db.subject.findMany({
+    select: { id: true, name: true },
+    orderBy: { name: 'asc' },
+  }),
   findAll: () => {
     return db.subject.findMany({
       include: {

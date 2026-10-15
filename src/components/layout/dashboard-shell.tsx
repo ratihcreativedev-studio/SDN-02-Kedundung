@@ -17,7 +17,7 @@ export function DashboardShell({
   const closeSidebar = useCallback(() => setIsSidebarOpen(false), [])
 
   return (
-    <div className="flex h-dvh overflow-hidden bg-background">
+    <div className="admin-shell flex h-dvh overflow-hidden bg-background">
       <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header email={email} photoURL={photoURL} isMenuOpen={isSidebarOpen} onMenuClick={() => setIsSidebarOpen(true)} />

@@ -2,9 +2,6 @@ import { classQueries } from './queries'
 import type { ClassInput } from './schemas'
 
 export const classService = {
-  async getAll() {
-    return classQueries.findAll()
-  },
   async getById(id: string) {
     const classData = await classQueries.findById(id)
     if (!classData) throw new Error('Kelas tidak ditemukan')

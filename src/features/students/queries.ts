@@ -2,6 +2,11 @@ import { db } from '@/lib/db'
 import type { StudentInput } from './schemas'
 
 export const studentQueries = {
+  findAcademicRoster: (classId: string) => db.student.findMany({
+    where: { classId },
+    select: { id: true, nisn: true, name: true },
+    orderBy: { name: 'asc' },
+  }),
   findAll: (params?: { classId?: string; search?: string; sortBy?: string; sortOrder?: 'asc' | 'desc'; page?: number; limit?: number }) => {
     const { classId, search, sortBy = 'name', sortOrder = 'asc', page = 1, limit = 10 } = params || {}
     const skip = (page - 1) * limit

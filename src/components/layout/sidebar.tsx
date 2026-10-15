@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import Link, { useLinkStatus } from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
@@ -10,6 +10,7 @@ import {
   GraduationCap,
   Image as ImageIcon,
   LayoutDashboard,
+  Loader2,
   Megaphone,
   School,
   Trophy,
@@ -52,6 +53,19 @@ const navSections = [
   },
 ]
 
+function NavigationPending() {
+  const { pending } = useLinkStatus()
+
+  return (
+    <span className="ml-auto flex h-4 w-4 shrink-0 items-center" role="status">
+      {pending && <>
+        <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden="true" />
+        <span className="sr-only">Memuat halaman...</span>
+      </>}
+    </span>
+  )
+}
+
 function NavLinks({ pathname, onClick }: { pathname: string; onClick?: () => void }) {
   return (
     <nav aria-label="Navigasi admin" className="min-h-0 flex-1 overflow-y-auto px-3 py-4 space-y-5">
@@ -85,6 +99,7 @@ function NavLinks({ pathname, onClick }: { pathname: string; onClick?: () => voi
                     }`}
                   />
                   <span>{item.name}</span>
+                  <NavigationPending />
                 </Link>
               )
             })}

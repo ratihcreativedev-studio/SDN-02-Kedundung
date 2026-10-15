@@ -13,7 +13,7 @@ export default async function EditSiswaPage({ params }: { params: Promise<{ id: 
   const { id } = await params
   const [student, classes] = await Promise.all([
     studentService.getById(id).catch(() => null),
-    classQueries.findAll(),
+    classQueries.findOptions(),
   ])
 
   if (!student) notFound()

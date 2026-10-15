@@ -1,7 +1,5 @@
 import { CalendarCheck } from 'lucide-react'
-import { classQueries } from '@/features/classes/queries'
-import { studentService } from '@/features/students/services'
-import { attendanceQueries } from '@/features/attendance/queries'
+import { getAttendancePageData } from '@/features/attendance/page-data'
 import { AttendanceUploadClient } from '@/features/attendance/components/AttendanceUploadClient'
 import { MonthFilter } from '@/features/attendance/components/MonthFilter'
 import { PageHeader } from '@/components/layout/page-header'
@@ -29,17 +27,10 @@ export default async function AdminAbsensiPage({
   searchParams: Promise<{ classId?: string; monthYear?: string }>
 }) {
   const params = await searchParams
-  const classes = await classQueries.findAll()
-  const classId = params.classId ?? classes[0]?.id ?? ''
   const monthYearVal = params.monthYear ?? currentMonthValue()
   const formattedMonth = formatMonth(monthYearVal)
 
-  const [students, attendances] = classId
-    ? await Promise.all([
-        studentService.getAll(classId),
-        attendanceQueries.findByClassAndMonth(classId, formattedMonth),
-      ])
-    : [[], []]
+  const { classes, classId, students, attendances } = await getAttendancePageData(params.classId, formattedMonth)
 
   return (
     <div className="space-y-4 sm:space-y-6">

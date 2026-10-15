@@ -338,3 +338,8 @@ body {
     border-radius: 1rem;
   }
 }
+
+/* Admin content is ready to use as soon as it arrives, without staggered entrances. */
+.admin-shell .animate-fade-in-up {
+  animation: none;
+}

@@ -8,7 +8,7 @@ export const gradeQueries = {
         semester,
         student: { classId },
       },
-      include: { student: true },
+      select: { studentId: true, score: true, uh1: true, uh2: true, uh3: true, uas: true },
     })
   },
 

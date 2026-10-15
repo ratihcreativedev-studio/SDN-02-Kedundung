@@ -4,7 +4,13 @@ import { PrismaPg } from '@prisma/adapter-pg'
 
 const prismaClientSingleton = () => {
   const connectionString = process.env.DATABASE_URL
-  const pool = new Pool({ connectionString })
+  // Each server/build worker owns a pool. Keep it small for the hosted pooler.
+  const pool = new Pool({
+    connectionString,
+    max: 2,
+    idleTimeoutMillis: 10_000,
+    connectionTimeoutMillis: 10_000,
+  })
   const adapter = new PrismaPg(pool)
   return new PrismaClient({ adapter })
 }
@@ -15,4 +21,4 @@ declare global {
 
 export const db = globalThis.prismaGlobal ?? prismaClientSingleton()
 
-if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = db
+globalThis.prismaGlobal = db
