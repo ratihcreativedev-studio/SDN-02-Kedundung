@@ -120,7 +120,7 @@ export function IjazahUploader({ studentId, existingUrl }: IjazahUploaderProps) 
               </a>
               <button
                 onClick={handleDelete}
-                disabled={isDeleting}
+                disabled={isDeleting || isLoading}
                 className="flex items-center justify-center rounded-lg p-2 text-red-500 transition-colors hover:bg-red-500/10 disabled:opacity-50"
                 title="Hapus Ijazah"
               >
@@ -141,7 +141,7 @@ export function IjazahUploader({ studentId, existingUrl }: IjazahUploaderProps) 
                 id="ijazah-upload"
                 accept="application/pdf"
                 onChange={handleFileChange}
-                disabled={isLoading}
+                disabled={isLoading || isDeleting}
                 className="block w-full text-sm text-text-secondary
                   file:mr-4 file:py-2.5 file:px-4
                   file:rounded-xl file:border-0
@@ -155,7 +155,7 @@ export function IjazahUploader({ studentId, existingUrl }: IjazahUploaderProps) 
             {file && (
               <button
                 onClick={handleUpload}
-                disabled={isLoading}
+                disabled={isLoading || isDeleting}
                 className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed min-w-[120px]"
               >
                 {isLoading ? (

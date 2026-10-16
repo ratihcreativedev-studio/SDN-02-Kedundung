@@ -26,7 +26,7 @@ export default async function DataSiswaPage({
       />
 
       <div className="animate-fade-in-up animate-delay-100">
-        <StudentList searchParams={params as any} />
+        <StudentList searchParams={params} />
       </div>
     </div>
   )

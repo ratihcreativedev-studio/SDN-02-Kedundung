@@ -11,7 +11,10 @@ export async function createClassAction(formData: FormData) {
     const parsed = classSchema.safeParse(Object.fromEntries(formData))
     if (!parsed.success) return { error: 'Data tidak valid' }
     await classService.create(parsed.data)
-    revalidatePath('/admin/kelas')
+    revalidatePath('/admin', 'layout')
+    revalidatePath('/data-siswa', 'layout')
+    revalidatePath('/absensi')
+    revalidatePath('/daftar-nilai')
     return { success: true }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Terjadi kesalahan' }
@@ -24,7 +27,10 @@ export async function updateClassAction(id: string, formData: FormData) {
     const parsed = classSchema.safeParse(Object.fromEntries(formData))
     if (!parsed.success) return { error: 'Data tidak valid' }
     await classService.update(id, parsed.data)
-    revalidatePath('/admin/kelas')
+    revalidatePath('/admin', 'layout')
+    revalidatePath('/data-siswa', 'layout')
+    revalidatePath('/absensi')
+    revalidatePath('/daftar-nilai')
     return { success: true }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Terjadi kesalahan' }
@@ -35,7 +41,10 @@ export async function deleteClassAction(id: string) {
   try {
     await requireAdminEmail()
     await classService.delete(id)
-    revalidatePath('/admin/kelas')
+    revalidatePath('/admin', 'layout')
+    revalidatePath('/data-siswa', 'layout')
+    revalidatePath('/absensi')
+    revalidatePath('/daftar-nilai')
     return { success: true }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Terjadi kesalahan' }

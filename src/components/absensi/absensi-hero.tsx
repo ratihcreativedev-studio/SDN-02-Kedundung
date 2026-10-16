@@ -1,11 +1,11 @@
 import { ClipboardList } from "lucide-react";
 
 type AbsensiHeroProps = {
-  bulan: string;
+  semester: string;
   kelas: string;
 };
 
-export function AbsensiHero({ bulan, kelas }: AbsensiHeroProps) {
+export function AbsensiHero({ semester, kelas }: AbsensiHeroProps) {
   return (
     <div className="page-hero">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -18,7 +18,7 @@ export function AbsensiHero({ bulan, kelas }: AbsensiHeroProps) {
               Rekap Absensi
             </h1>
             <p className="text-sm text-text-secondary sm:text-base">
-              Pantau kehadiran siswa per kelas dan per bulan dalam satu
+              Pantau kehadiran siswa per kelas dan per semester dalam satu
               tampilan ringkas.
             </p>
           </div>
@@ -32,9 +32,9 @@ export function AbsensiHero({ bulan, kelas }: AbsensiHeroProps) {
           </div>
           <div className="rounded-2xl bg-white/80 p-4 shadow-sm">
             <div className="text-xs uppercase tracking-[0.16em] text-text-muted">
-              Bulan
+              Semester
             </div>
-            <div className="mt-1 text-lg font-bold text-primary">{bulan}</div>
+            <div className="mt-1 text-lg font-bold text-primary">{semester}</div>
           </div>
         </div>
       </div>

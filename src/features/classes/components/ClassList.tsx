@@ -9,20 +9,19 @@ export async function ClassList() {
   return (
     <div className="section-card overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="min-w-[700px] w-full text-left text-sm">
+        <table className="min-w-[600px] w-full text-left text-sm">
           <thead className="bg-surface-alt text-text-secondary border-b border-border">
             <tr>
               <th className="py-4 px-6 font-semibold">Nama Kelas</th>
               <th className="py-4 px-6 font-semibold">Jumlah Siswa</th>
               <th className="py-4 px-6 font-semibold">Wali Kelas</th>
-              <th className="py-4 px-6 font-semibold">Mapel</th>
               <th className="py-4 px-6 text-right font-semibold">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {classes.length === 0 ? (
               <tr>
-                <td colSpan={5} className="py-8 text-center text-text-muted">
+                <td colSpan={4} className="py-8 text-center text-text-muted">
                   Belum ada data kelas
                 </td>
               </tr>
@@ -37,9 +36,6 @@ export async function ClassList() {
                   </td>
                   <td className="py-4 px-6 text-text-secondary">
                     {cls.homeroom?.name || '-'}
-                  </td>
-                  <td className="py-4 px-6 text-text-secondary">
-                    {cls.subjects.length} Mapel
                   </td>
                   <td className="py-4 px-6 text-right">
                     <div className="flex justify-end gap-1">

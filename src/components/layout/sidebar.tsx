@@ -4,7 +4,6 @@ import Link, { useLinkStatus } from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
-  BookOpen,
   CalendarCheck,
   ClipboardList,
   GraduationCap,
@@ -32,7 +31,6 @@ const navSections = [
       { name: 'Alumni', href: '/admin/alumni', icon: GraduationCap },
       { name: 'Kelas', href: '/admin/kelas', icon: School },
       { name: 'Guru & Staff', href: '/admin/guru', icon: Users },
-      { name: 'Mata Pelajaran', href: '/admin/mata-pelajaran', icon: BookOpen },
     ],
   },
   {

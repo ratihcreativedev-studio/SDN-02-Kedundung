@@ -1,6 +1,4 @@
-import { dataAbsensi } from "@/data";
-
-type AbsensiRow = (typeof dataAbsensi)[number];
+type AbsensiRow = { siswaId: string; nama: string; hadir: number; sakit: number; izin: number; alpa: number; totalHari: number };
 
 type AbsensiTableProps = {
   rows: AbsensiRow[];
@@ -26,8 +24,9 @@ export function AbsensiTable({ rows }: AbsensiTableProps) {
             </tr>
           </thead>
           <tbody>
+            {rows.length === 0 && <tr><td colSpan={8} className="px-4 py-8 text-center text-text-muted">Belum ada rekap absensi untuk kelas dan semester ini.</td></tr>}
             {rows.map((row, i) => {
-              const pct = Math.round((row.hadir / row.totalHari) * 100);
+              const pct = row.totalHari > 0 ? Math.round((row.hadir / row.totalHari) * 100) : 0;
 
               return (
                 <tr

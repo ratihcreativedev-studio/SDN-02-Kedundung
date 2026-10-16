@@ -1,5 +1,5 @@
 import { classQueries } from "@/features/classes/queries";
-import { studentService } from "@/features/students/services";
+import { db } from "@/lib/db";
 import { Users } from "lucide-react";
 import { StudentSearchByNisn } from "@/features/students/components/StudentSearchByNisn";
 import { StudentClassPieChart } from "@/features/students/components/StudentClassPieChart";
@@ -7,14 +7,14 @@ import { StudentClassPieChart } from "@/features/students/components/StudentClas
 export const revalidate = 3600;
 
 export default async function DataSiswaPage() {
-  const [classes, students] = await Promise.all([
-    classQueries.findAll().catch((error) => {
+  const [classes, totalStudents] = await Promise.all([
+    classQueries.findActiveStatistics().catch((error) => {
       console.error("Gagal memuat data kelas dari database:", error);
       return [];
     }),
-    studentService.getAll().catch((error) => {
+    db.student.count({ where: { status: 'active' } }).catch((error) => {
       console.error("Gagal memuat data siswa dari database:", error);
-      return [];
+      return 0;
     }),
   ]);
 
@@ -39,7 +39,7 @@ export default async function DataSiswaPage() {
         
         <StudentSearchByNisn />
         
-        <StudentClassPieChart classes={classes} totalStudents={students.length} />
+        <StudentClassPieChart classes={classes} totalStudents={totalStudents} />
       </div>
     </div>
   );

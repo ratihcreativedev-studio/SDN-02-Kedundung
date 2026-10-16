@@ -24,6 +24,7 @@ export async function createAchievementAction(formData: FormData) {
     await achievementService.create({ ...parsed.data, imageUrl })
     revalidatePath('/admin/prestasi')
     revalidatePath('/prestasi')
+    revalidatePath('/data-siswa', 'layout')
     return { success: true }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Terjadi kesalahan' }
@@ -43,16 +44,19 @@ export async function updateAchievementAction(id: string, formData: FormData) {
     let imageUrl = existingData.imageUrl || ''
 
     if (image && image.size > 0) {
-      // Hapus gambar lama jika ada
-      if (existingData.imageUrl) {
-        await storageService.deleteImage(existingData.imageUrl)
-      }
       imageUrl = await storageService.uploadImage(image, 'prestasi')
     }
 
-    await achievementService.update(id, { ...parsed.data, imageUrl })
+    try {
+      await achievementService.update(id, { ...parsed.data, imageUrl })
+    } catch (error) {
+      if (imageUrl && imageUrl !== existingData.imageUrl) await storageService.deleteImage(imageUrl).catch(() => {})
+      throw error
+    }
+    if (existingData.imageUrl && imageUrl !== existingData.imageUrl) await storageService.deleteImage(existingData.imageUrl).catch(() => {})
     revalidatePath('/admin/prestasi')
     revalidatePath('/prestasi')
+    revalidatePath('/data-siswa', 'layout')
     return { success: true }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Terjadi kesalahan' }
@@ -64,13 +68,11 @@ export async function deleteAchievementAction(id: string) {
     await requireAdminEmail()
     const existingData = await achievementService.getById(id)
     
-    if (existingData?.imageUrl) {
-      await storageService.deleteImage(existingData.imageUrl)
-    }
-
     await achievementService.delete(id)
+    if (existingData?.imageUrl) await storageService.deleteImage(existingData.imageUrl).catch(() => {})
     revalidatePath('/admin/prestasi')
     revalidatePath('/prestasi')
+    revalidatePath('/data-siswa', 'layout')
     return { success: true }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Terjadi kesalahan' }

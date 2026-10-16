@@ -11,7 +11,6 @@ export default async function DashboardPage() {
   const stats = [
     { name: 'Total Siswa', value: counts.students, icon: GraduationCap, gradient: 'from-emerald-500 to-teal-600', bg: 'bg-emerald-50', text: 'text-emerald-600' },
     { name: 'Total Kelas', value: counts.classes, icon: Users, gradient: 'from-violet-500 to-purple-600', bg: 'bg-violet-50', text: 'text-violet-600' },
-    { name: 'Mata Pelajaran', value: counts.subjects, icon: FileText, gradient: 'from-amber-500 to-orange-600', bg: 'bg-amber-50', text: 'text-amber-600' },
     { name: 'Prestasi', value: counts.achievements, icon: Trophy, gradient: 'from-rose-500 to-pink-600', bg: 'bg-rose-50', text: 'text-rose-600' },
     { name: 'Pengumuman', value: counts.announcements, icon: FileText, gradient: 'from-blue-500 to-indigo-600', bg: 'bg-blue-50', text: 'text-blue-600' },
   ]
@@ -36,8 +35,8 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Stats Grid - 2 cols on mobile, 3 on tablet+  */}
-      <div className="grid grid-cols-2 gap-2.5 sm:gap-4 md:grid-cols-3 xl:grid-cols-5">
+      {/* Stats Grid - 2 cols on mobile, 4 on desktop  */}
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-4 xl:grid-cols-4">
         {stats.map((stat, index) => (
           <div
             key={stat.name}

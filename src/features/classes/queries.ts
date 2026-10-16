@@ -6,16 +6,16 @@ export const classQueries = {
     select: { id: true, name: true },
     orderBy: { name: 'asc' },
   }),
+  findActiveStatistics: () => db.class.findMany({
+    select: { id: true, name: true, homeroom: { select: { name: true } }, _count: { select: { students: { where: { status: 'active' } } } } },
+    orderBy: { name: 'asc' },
+  }),
   findAll: () => {
     return db.class.findMany({
       include: {
         homeroom: true,
         _count: {
           select: { students: true },
-        },
-        subjects: {
-          include: { subject: true },
-          orderBy: { subject: { name: 'asc' } },
         },
       },
       orderBy: { name: 'asc' },
@@ -24,7 +24,7 @@ export const classQueries = {
   findById: (id: string) => {
     return db.class.findUnique({
       where: { id },
-      include: { homeroom: true, subjects: true },
+      include: { homeroom: true },
     })
   },
   create: (data: ClassInput) => {

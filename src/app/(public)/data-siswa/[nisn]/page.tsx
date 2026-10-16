@@ -1,7 +1,9 @@
+import { StudentBiodata } from '@/features/students/components/StudentBiodata'
+import { StudentAttendanceRecap } from '@/features/attendance/components/StudentAttendanceRecap'
 import { StudentGradeTable } from '@/features/grades/components/StudentGradeTable'
 import { getStudentByNISNAction } from '@/features/students/actions'
 import Link from 'next/link'
-import { ArrowLeft, User, BookOpen, CalendarDays, Download, Award, CheckCircle2, Info, StickyNote } from 'lucide-react'
+import { ArrowLeft, User, BookOpen, Download, Award, Info, StickyNote } from 'lucide-react'
 
 export async function generateMetadata({ params }: { params: Promise<{ nisn: string }> }) {
   const resolvedParams = await params
@@ -39,18 +41,6 @@ export default async function PublicStudentDetailPage({ params }: { params: Prom
 
   const studentData = result.data
 
-  const formattedDate = studentData?.birthDate 
-    ? new Date(studentData.birthDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
-    : '-'
-
-  // Overall attendance calculations
-  const totalHadir = (studentData.monthlyAttendances || []).reduce((sum: number, att: any) => sum + (att.hadir || 0), 0)
-  const totalSakit = (studentData.monthlyAttendances || []).reduce((sum: number, att: any) => sum + (att.sakit || 0), 0)
-  const totalIzin = (studentData.monthlyAttendances || []).reduce((sum: number, att: any) => sum + (att.izin || 0), 0)
-  const totalAlpha = (studentData.monthlyAttendances || []).reduce((sum: number, att: any) => sum + (att.alpha || 0), 0)
-  const totalHariAbsen = totalHadir + totalSakit + totalIzin + totalAlpha
-  const overallPercentage = totalHariAbsen > 0 ? Math.round((totalHadir / totalHariAbsen) * 100) : 0
-
   return (
     <div className="page-shell">
       <div className="page-container max-w-6xl py-8">
@@ -64,8 +54,8 @@ export default async function PublicStudentDetailPage({ params }: { params: Prom
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-primary sm:text-3xl">Detail Data Akademik Siswa</h1>
-            <p className="text-sm text-text-secondary">Informasi profil, daftar nilai, dan riwayat absensi peserta didik</p>
+            <h1 className="text-2xl font-bold text-primary sm:text-3xl">Detail Data Siswa</h1>
+            <p className="text-sm text-text-secondary">Biodata lengkap, data orang tua, nilai, absensi, dan prestasi peserta didik</p>
           </div>
         </div>
 
@@ -82,11 +72,9 @@ export default async function PublicStudentDetailPage({ params }: { params: Prom
                 <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-surface-alt text-text-secondary border border-border">
                   NISN: {studentData.nisn}
                 </span>
-                {studentData.nipd && (
                   <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-surface-alt text-text-secondary border border-border">
-                    NIM/NIPD: {studentData.nipd}
+                    NIM/NIPD: {studentData.nipd || '-'}
                   </span>
-                )}
               </div>
               <span className="inline-flex items-center px-3.5 py-1.5 rounded-full text-sm font-semibold bg-primary/10 text-primary border border-primary/20">
                 {studentData.class?.name || 'Belum ada kelas'}
@@ -113,31 +101,7 @@ export default async function PublicStudentDetailPage({ params }: { params: Prom
               </div>
             )}
 
-            {/* Data Diri Card */}
-            <div className="section-card p-6 bg-white border border-border rounded-2xl shadow-sm">
-              <div className="flex items-center gap-2.5 mb-4 pb-3 border-b border-border">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600">
-                  <User size={18} />
-                </div>
-                <h3 className="text-base font-bold text-primary">Data Pribadi</h3>
-              </div>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between items-center py-1.5 border-b border-border/50">
-                  <span className="text-text-muted text-xs">Jenis Kelamin</span>
-                  <span className="font-semibold text-text-primary">
-                    {studentData.gender === 'L' ? 'Laki-Laki' : studentData.gender === 'P' ? 'Perempuan' : '-'}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-1.5 border-b border-border/50">
-                  <span className="text-text-muted text-xs">Tempat Lahir</span>
-                  <span className="font-semibold text-text-primary">{studentData.birthPlace || '-'}</span>
-                </div>
-                <div className="flex justify-between items-center py-1.5">
-                  <span className="text-text-muted text-xs">Tanggal Lahir</span>
-                  <span className="font-semibold text-text-primary">{formattedDate}</span>
-                </div>
-              </div>
-            </div>
+            <StudentBiodata student={studentData} />
           </div>
 
           {/* Right Column: Daftar Nilai & Rekap Absensi */}
@@ -187,102 +151,25 @@ export default async function PublicStudentDetailPage({ params }: { params: Prom
               )}
             </div>
 
-            {/* REKAP ABSENSI SISWA */}
-            <div className="section-card p-6 bg-white border border-border rounded-2xl shadow-sm">
-              <div className="flex items-center justify-between mb-5 pb-3 border-b border-border">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600">
-                    <CalendarDays size={20} />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-primary">Rekap & Riwayat Absensi</h3>
-                    <p className="text-xs text-text-secondary">Statistik dan rincian kehadiran berkala siswa</p>
-                  </div>
-                </div>
-                {totalHariAbsen > 0 && (
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    <CheckCircle2 size={13} />
-                    {overallPercentage}% Kehadiran
-                  </span>
-                )}
-              </div>
+            <StudentAttendanceRecap history={studentData.attendanceHistory} />
 
-              {studentData.monthlyAttendances && studentData.monthlyAttendances.length > 0 ? (
-                <div className="space-y-5">
-                  {/* Summary KPI Cards */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="bg-emerald-50/80 border border-emerald-200/80 p-3 rounded-xl text-center">
-                      <span className="text-xs font-semibold text-emerald-700 block mb-1">Hadir</span>
-                      <span className="text-2xl font-black text-emerald-700">{totalHadir}</span>
-                      <span className="text-[10px] text-emerald-600 block mt-0.5">Hari</span>
-                    </div>
-                    <div className="bg-amber-50/80 border border-amber-200/80 p-3 rounded-xl text-center">
-                      <span className="text-xs font-semibold text-amber-700 block mb-1">Sakit</span>
-                      <span className="text-2xl font-black text-amber-700">{totalSakit}</span>
-                      <span className="text-[10px] text-amber-600 block mt-0.5">Hari</span>
-                    </div>
-                    <div className="bg-blue-50/80 border border-blue-200/80 p-3 rounded-xl text-center">
-                      <span className="text-xs font-semibold text-blue-700 block mb-1">Izin</span>
-                      <span className="text-2xl font-black text-blue-700">{totalIzin}</span>
-                      <span className="text-[10px] text-blue-600 block mt-0.5">Hari</span>
-                    </div>
-                    <div className="bg-rose-50/80 border border-rose-200/80 p-3 rounded-xl text-center">
-                      <span className="text-xs font-semibold text-rose-700 block mb-1">Alpha</span>
-                      <span className="text-2xl font-black text-rose-700">{totalAlpha}</span>
-                      <span className="text-[10px] text-rose-600 block mt-0.5">Hari</span>
-                    </div>
-                  </div>
-
-                  {/* Monthly Attendance Table */}
-                  <div className="overflow-x-auto rounded-xl border border-border">
-                    <table className="w-full text-left text-sm">
-                      <thead className="bg-surface-alt/70 text-text-secondary text-xs uppercase tracking-wider font-semibold border-b border-border">
-                        <tr>
-                          <th className="px-4 py-3">Bulan / Periode</th>
-                          <th className="px-3 py-3 text-center text-emerald-700">Hadir</th>
-                          <th className="px-3 py-3 text-center text-amber-700">Sakit</th>
-                          <th className="px-3 py-3 text-center text-blue-700">Izin</th>
-                          <th className="px-3 py-3 text-center text-rose-700">Alpha</th>
-                          <th className="px-4 py-3 text-center font-bold">Kehadiran</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border text-xs sm:text-sm">
-                        {studentData.monthlyAttendances.map((att: any) => (
-                          <tr key={att.id || att.month} className="hover:bg-surface-alt/40 transition-colors">
-                            <td className="px-4 py-3 font-semibold text-primary">
-                              {att.month}
-                            </td>
-                            <td className="px-3 py-3 text-center font-bold text-emerald-600">
-                              {att.hadir}
-                            </td>
-                            <td className="px-3 py-3 text-center text-amber-600">
-                              {att.sakit}
-                            </td>
-                            <td className="px-3 py-3 text-center text-blue-600">
-                              {att.izin}
-                            </td>
-                            <td className="px-3 py-3 text-center text-rose-600">
-                              {att.alpha}
-                            </td>
-                            <td className="px-4 py-3 text-center font-bold text-primary">
-                              <span className="inline-block px-2.5 py-0.5 rounded-md bg-surface-alt border border-border text-xs font-bold">
-                                {att.persentase}%
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8 bg-surface-alt/30 rounded-xl border border-dashed border-border">
-                  <Info className="mx-auto h-8 w-8 text-text-muted mb-2" />
-                  <p className="text-sm font-semibold text-text-primary">Belum Ada Data Absensi</p>
-                  <p className="text-xs text-text-secondary mt-1">Data absensi untuk siswa ini belum diinput oleh pihak sekolah.</p>
-                </div>
-              )}
-            </div>
+            <section className="section-card rounded-2xl border border-border bg-white p-6 shadow-sm">
+              <h3 className="mb-4 border-b border-border pb-3 text-lg font-bold text-primary">Prestasi Siswa</h3>
+              {studentData.achievements?.length ? <div className="space-y-4">
+                {studentData.achievements.map(achievement => <article key={achievement.id} className="rounded-xl border border-border bg-surface-alt/30 p-4">
+                  <h4 className="font-semibold text-primary">{achievement.title}</h4>
+                  <dl className="mt-3 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+                    {[
+                      ['Kegiatan', achievement.eventName], ['Tingkat', achievement.level],
+                      ['Peringkat', achievement.rank],
+                      ['Tanggal', achievement.date ? new Date(achievement.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }) : null],
+                    ].map(([label, value]) => <div key={label}><dt className="text-xs text-text-muted">{label}</dt><dd className="break-words font-medium text-text-primary">{value || '-'}</dd></div>)}
+                  </dl>
+                  {achievement.note && <p className="mt-3 whitespace-pre-wrap break-words text-sm text-text-secondary">{achievement.note}</p>}
+                  {achievement.imageUrl && <a href={achievement.imageUrl} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-sm font-semibold text-primary underline">Lihat Dokumentasi</a>}
+                </article>)}
+              </div> : <p className="text-sm text-text-muted">Belum ada data prestasi.</p>}
+            </section>
 
           </div>
         </div>

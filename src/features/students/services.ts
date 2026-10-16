@@ -45,8 +45,8 @@ export const studentService = {
     await this.getById(id)
     return studentQueries.delete(id)
   },
-  async updateIjazahUrl(id: string, ijazahUrl: string) {
+  async updateIjazahUrl(id: string, ijazahUrl: string | null) {
     await this.getById(id)
-    return studentQueries.update(id, { ijazahUrl } as any)
+    return studentQueries.update(id, { ijazahUrl })
   },
 }

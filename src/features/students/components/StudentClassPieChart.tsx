@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, type ChartConfig } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 
 type ClassItem = {
   id: string;
@@ -138,21 +138,6 @@ export function StudentClassPieChart({
     return activeClasses.length > 0 ? activeClasses : allClassData;
   }, [allClassData]);
 
-  const chartConfig = React.useMemo(() => {
-    const config: ChartConfig = {
-      students: {
-        label: "Jumlah Siswa",
-      },
-    };
-    chartSlices.forEach((item) => {
-      config[item.id] = {
-        label: item.name,
-        color: item.fill,
-      };
-    });
-    return config;
-  }, [chartSlices]);
-
   if (allClassData.length === 0) {
     return (
       <Card className="p-8 text-center bg-white shadow-sm">
@@ -187,7 +172,7 @@ export function StudentClassPieChart({
           {/* Full Solid Pie Chart Section */}
           <div className="lg:col-span-5 flex flex-col items-center justify-center">
             <div className="relative w-full h-[320px] sm:h-[350px] max-w-[360px] flex items-center justify-center">
-              <ChartContainer config={chartConfig} className="h-full w-full">
+              <ChartContainer className="h-full w-full">
                 <PieChart>
                   <ChartTooltip content={<CustomTooltip />} />
                   <Pie

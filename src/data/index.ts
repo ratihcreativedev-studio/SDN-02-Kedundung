@@ -8,11 +8,9 @@ import {
   Users,
 } from "lucide-react";
 
-import dataAbsensi from "./dataAbsensi.json";
-import dataNilai from "./dataNilai.json";
 import tataTertibData from "./tataTertib.json";
 
-export { dataAbsensi, dataNilai, tataTertibData };
+export { tataTertibData };
 
 export const kebiasaan7Kaih = [
   {

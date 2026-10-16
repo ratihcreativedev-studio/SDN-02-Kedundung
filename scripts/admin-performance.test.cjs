@@ -21,7 +21,7 @@ function load(file, db, mocks = {}) {
 const plain = value => JSON.parse(JSON.stringify(value))
 
 test('dashboard counts only active students and requests only the five latest announcement fields', async () => {
-  const counts = { students: 12001, classes: 7, subjects: 6, achievements: 20, announcements: 14 }
+  const counts = { students: 12001, classes: 7, achievements: 20, announcements: 14 }
   const recent = [{ id: 'qa-announcement', title: 'QA', content: 'QA', createdAt: new Date() }]
   let calls = 0
   const db = {
@@ -40,7 +40,7 @@ test('dashboard counts only active students and requests only the five latest an
   }
   const { getDashboardSummary } = load('src/features/dashboard/queries.ts', db)
   const result = await getDashboardSummary()
-  assert.deepEqual(plain(result.counts), { students: 12001, classes: 7, subjects: 6, achievements: 20, announcements: 14 })
+  assert.deepEqual(plain(result.counts), { students: 12001, classes: 7, achievements: 20, announcements: 14 })
   assert.equal(result.announcements, recent)
   assert.equal(calls, 2)
 })
@@ -52,25 +52,24 @@ test('explicit academic filters fetch records while option lists are still pendi
     const calls = []
     const mocks = {
       '@/features/classes/queries': { classQueries: { findOptions: () => options } },
-      '@/features/subjects/queries': { subjectQueries: { findOptions: () => options } },
       '@/features/students/queries': { studentQueries: { findAcademicRoster: async id => {
         calls.push(['roster', id]); return [{ id: 'qa-student', name: 'QA', nisn: '0000000001' }]
       } } },
       './queries': feature === 'grades'
         ? { gradeQueries: { findByClassSemester: async (...args) => { calls.push(['records', ...args]); return [] } } }
-        : { attendanceQueries: { findByClassAndMonth: async (...args) => { calls.push(['records', ...args]); return [] } } },
+        : { attendanceQueries: { findByClassAndSemester: async (...args) => { calls.push(['records', ...args]); return [] } } },
     }
     const api = load(`src/features/${feature}/page-data.ts`, null, mocks)
     const result = feature === 'grades'
       ? api.getGradePageData({ classId: 'qa-class', semester: 'Genap 2026/2027' })
-      : api.getAttendancePageData('qa-class', 'Oktober 2026')
+      : api.getAttendancePageData('qa-class', 'Ganjil 2026/2027')
     await new Promise(resolve => setImmediate(resolve))
     const earlyCalls = [...calls]
     releaseOptions([{ id: 'default', name: 'Default' }])
     const data = await result
     assert.deepEqual(earlyCalls, feature === 'grades'
       ? [['roster', 'qa-class'], ['records', 'qa-class', 'Genap 2026/2027']]
-      : [['roster', 'qa-class'], ['records', 'qa-class', 'Oktober 2026']])
+      : [['roster', 'qa-class'], ['records', 'qa-class', 'Ganjil 2026/2027']])
     assert.equal(data.classId, 'qa-class')
     assert.equal(data.students.length, 1)
   }
@@ -81,7 +80,6 @@ test('academic page defaults keep the first option and skip records when options
     const calls = []
     const mocks = {
       '@/features/classes/queries': { classQueries: { findOptions: async () => empty ? [] : [{ id: 'first-class' }] } },
-      '@/features/subjects/queries': { subjectQueries: { findOptions: async () => empty ? [] : [{ id: 'first-subject' }] } },
       '@/features/students/queries': { studentQueries: { findAcademicRoster: async id => { calls.push(id); return [] } } },
       './queries': { gradeQueries: { findByClassSemester: async (...args) => { calls.push(args); return [] } } },
     }
@@ -91,15 +89,15 @@ test('academic page defaults keep the first option and skip records when options
     assert.deepEqual(calls, empty ? [] : ['first-class', ['first-class', 'Ganjil 2025/2026']])
 
     calls.length = 0
-    mocks['./queries'] = { attendanceQueries: { findByClassAndMonth: async (...args) => { calls.push(args); return [] } } }
-    const attendance = await load('src/features/attendance/page-data.ts', null, mocks).getAttendancePageData(undefined, 'Oktober 2026')
+    mocks['./queries'] = { attendanceQueries: { findByClassAndSemester: async (...args) => { calls.push(args); return [] } } }
+    const attendance = await load('src/features/attendance/page-data.ts', null, mocks).getAttendancePageData(undefined, 'Ganjil 2026/2027')
     assert.equal(attendance.classId, empty ? '' : 'first-class')
-    assert.deepEqual(calls, empty ? [] : ['first-class', ['first-class', 'Oktober 2026']])
+    assert.deepEqual(calls, empty ? [] : ['first-class', ['first-class', 'Ganjil 2026/2027']])
   }
 })
 
-test('class and subject options exclude relations and keep alphabetical ordering', async () => {
-  for (const [feature, name, model] of [['classes', 'classQueries', 'class'], ['subjects', 'subjectQueries', 'subject']]) {
+test('class options exclude relations and keep alphabetical ordering', async () => {
+  for (const [feature, name, model] of [['classes', 'classQueries', 'class']]) {
     const rows = [{ id: 'qa-1', name: 'QA' }]
     const db = { [model]: { findMany: async args => {
       assert.deepEqual(plain(args), { select: { id: true, name: true }, orderBy: { name: 'asc' } })
@@ -119,20 +117,20 @@ test('academic roster is class-scoped and never loads private biodata', async ()
   assert.equal(result, rows)
 })
 
-test('grades and attendance retain their filters and displayed values without student joins', async () => {
+test('grades and attendance retain their filters and displayed values with minimal student identity', async () => {
   const db = { studentReport: { findMany: async args => {
     assert.deepEqual(plain(args.where), { semester: 'Ganjil 2026/2027', classId: 'qa-class' })
     assert.deepEqual(plain(args.select), { studentId: true, score: true, uh: true, asts: true, asas: true, student: { select: { id: true, nisn: true, name: true } } })
     assert.equal(args.include, undefined)
     return [{ studentId: 'qa-1', score: 0, uh: 0, asts: null, asas: 90 }]
-  } }, attendance: { findMany: async args => {
-    assert.deepEqual(plain(args.where), { monthYear: 'Oktober 2026', student: { classId: 'qa-class' } })
-    assert.deepEqual(plain(args.select), { studentId: true, hadir: true, sakit: true, izin: true, alpha: true })
+  } }, attendanceRecap: { findMany: async args => {
+    assert.deepEqual(plain(args.where), { semester: 'Ganjil 2026/2027', classId: 'qa-class' })
+    assert.deepEqual(plain(args.select), { studentId: true, hadir: true, sakit: true, izin: true, alpha: true, student: { select: { id: true, nisn: true, name: true } } })
     assert.equal(args.include, undefined)
     return [{ studentId: 'qa-1', hadir: 20, sakit: 1, izin: 0, alpha: 0 }]
   } } }
   const grades = await load('src/features/grades/queries.ts', db).gradeQueries.findByClassSemester('qa-class', 'Ganjil 2026/2027')
-  const attendance = await load('src/features/attendance/queries.ts', db).attendanceQueries.findByClassAndMonth('qa-class', 'Oktober 2026')
+  const attendance = await load('src/features/attendance/queries.ts', db).attendanceQueries.findByClassAndSemester('qa-class', 'Ganjil 2026/2027')
   assert.equal(grades[0].uh, 0)
   assert.equal(grades[0].asts, null)
   assert.equal(attendance[0].izin, 0)

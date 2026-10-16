@@ -1,49 +1,41 @@
 import { CalendarCheck } from 'lucide-react'
 import { getAttendancePageData } from '@/features/attendance/page-data'
 import { AttendanceUploadClient } from '@/features/attendance/components/AttendanceUploadClient'
-import { MonthFilter } from '@/features/attendance/components/MonthFilter'
+import { AttendanceFilter } from '@/features/attendance/components/AttendanceFilter'
+import { semesterSchema } from '@/features/attendance/schemas'
 import { PageHeader } from '@/components/layout/page-header'
 
 export const metadata = {
-  title: 'Absensi Bulanan | SIPANDA Admin',
-}
-
-function currentMonthValue() {
-  const d = new Date()
-  const month = (d.getMonth() + 1).toString().padStart(2, '0')
-  return `${d.getFullYear()}-${month}`
-}
-
-function formatMonth(monthYear: string) {
-  if (!monthYear) return ''
-  const [year, month] = monthYear.split('-')
-  const date = new Date(Number(year), Number(month) - 1, 1)
-  return date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
+  title: 'Rekap Absensi | SIPANDA Admin',
 }
 
 export default async function AdminAbsensiPage({
   searchParams,
 }: {
-  searchParams: Promise<{ classId?: string; monthYear?: string }>
+  searchParams: Promise<{ classId?: string; semester?: string }>
 }) {
   const params = await searchParams
-  const monthYearVal = params.monthYear ?? currentMonthValue()
-  const formattedMonth = formatMonth(monthYearVal)
+  const parsedYear = semesterSchema.safeParse(params.semester)
+  const semester = parsedYear.success ? parsedYear.data : 'Ganjil 2025/2026'
+  const { classes, classId, students, attendances } = await getAttendancePageData(params.classId, semester)
 
-  const { classes, classId, students, attendances } = await getAttendancePageData(params.classId, formattedMonth)
+  const className = classes.find(item => item.id === classId)?.name ?? 'Kelas'
+  const attendanceMap = Object.fromEntries(attendances.map(item => [item.studentId, item]))
 
   return (
     <div className="space-y-4 sm:space-y-6">
       <PageHeader
-        title="Absensi Bulanan"
-        description="Upload rekap kehadiran siswa per kelas via file Excel."
+        title="Rekap Absensi"
+        description="Upload absensi siswa per kelas dan semester/tahun ajaran sesuai format HADIR, SAKIT, IJIN, dan ALPA."
         icon={CalendarCheck}
         iconGradient="from-teal-500 to-teal-600"
       />
 
-      <MonthFilter classes={classes} classId={classId} monthYearVal={monthYearVal} basePath="/admin/absensi" />
-
-      <AttendanceUploadClient monthYear={formattedMonth} students={students} attendances={attendances} />
+      <AttendanceFilter key={`${classId}-${semester}`} classes={classes} classId={classId} semester={semester} basePath="/admin/absensi">
+        {classId ? <AttendanceUploadClient key={`${classId}-${semester}`} classId={classId} className={className} semester={semester} students={students} attendanceMap={attendanceMap} /> : (
+          <div className="section-card"><div className="empty-state"><p className="text-sm text-text-muted">Tambahkan kelas terlebih dahulu.</p></div></div>
+        )}
+      </AttendanceFilter>
     </div>
   )
 }

@@ -1,10 +1,11 @@
 import { StudentGradeTable } from '@/features/grades/components/StudentGradeTable'
 import { studentService } from '@/features/students/services'
 import { gradeQueries } from '@/features/grades/queries'
-import { attendanceQueries } from '@/features/attendance/queries'
+import { getStudentAttendanceHistory, type StudentAttendanceHistory } from '@/features/attendance/student-history'
+import { StudentAttendanceRecap } from '@/features/attendance/components/StudentAttendanceRecap'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, User, MapPin, Users, BookOpen, CalendarDays } from 'lucide-react'
+import { ArrowLeft, User, MapPin, Users, BookOpen } from 'lucide-react'
 import { IjazahUploader } from '@/features/students/components/IjazahUploader'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -21,11 +22,11 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   const resolvedParams = await params
   let student: Awaited<ReturnType<typeof studentService.getById>>
   let grades: Awaited<ReturnType<typeof gradeQueries.findByStudent>> = []
-  let attendances: Awaited<ReturnType<typeof attendanceQueries.findByStudent>> = []
+  let attendanceHistory: StudentAttendanceHistory = { recaps: [], monthly: [] }
   try {
     student = await studentService.getById(resolvedParams.id)
     grades = await gradeQueries.findByStudent(student.id)
-    attendances = await attendanceQueries.findByStudent(student.id)
+    attendanceHistory = await getStudentAttendanceHistory(student.id)
   } catch {
     notFound()
   }
@@ -33,15 +34,6 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   const formattedDate = student.birthDate 
     ? new Date(student.birthDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
     : '-'
-
-  // Attendance is now stored as monthly summaries directly
-  const monthlyAttendances = attendances.map((att) => ({
-    month: att.monthYear,
-    hadir: att.hadir,
-    sakit: att.sakit,
-    izin: att.izin,
-    alpha: att.alpha,
-  }))
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in-up">
@@ -72,47 +64,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
             {student.graduationDate && <p className="mt-1 text-xs text-text-muted">Tanggal kelulusan: {student.graduationDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}</p>}
           </div>
 
-          {/* Attendance Recap Card */}
-          <div className="section-card p-6 h-fit">
-            <div className="flex items-center gap-3 mb-4 pb-3 border-b border-border">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600">
-                <CalendarDays size={16} />
-              </div>
-              <h3 className="text-lg font-bold text-primary">Rekap Absensi</h3>
-            </div>
-            
-            {monthlyAttendances.length > 0 ? (
-              <div className="space-y-4">
-                {monthlyAttendances.map(att => (
-                  <div key={att.month} className="bg-surface-alt/30 p-4 rounded-xl border border-border">
-                    <h4 className="text-sm font-bold text-primary mb-3 text-center">{att.month}</h4>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="flex justify-between items-center bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
-                        <span className="font-medium text-emerald-700 dark:text-emerald-400">Hadir</span>
-                        <span className="font-bold text-emerald-700 dark:text-emerald-400">{att.hadir}</span>
-                      </div>
-                      <div className="flex justify-between items-center bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20">
-                        <span className="font-medium text-amber-700 dark:text-amber-400">Sakit</span>
-                        <span className="font-bold text-amber-700 dark:text-amber-400">{att.sakit}</span>
-                      </div>
-                      <div className="flex justify-between items-center bg-blue-500/10 px-3 py-1.5 rounded-lg border border-blue-500/20">
-                        <span className="font-medium text-blue-700 dark:text-blue-400">Izin</span>
-                        <span className="font-bold text-blue-700 dark:text-blue-400">{att.izin}</span>
-                      </div>
-                      <div className="flex justify-between items-center bg-red-500/10 px-3 py-1.5 rounded-lg border border-red-500/20">
-                        <span className="font-medium text-red-700 dark:text-red-400">Alpha</span>
-                        <span className="font-bold text-red-700 dark:text-red-400">{att.alpha}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-text-muted text-center py-6 bg-surface-alt/30 rounded-xl border border-dashed border-border">
-                Belum ada data absensi
-              </p>
-            )}
-          </div>
+          <StudentAttendanceRecap history={attendanceHistory} />
 
           {/* Ijazah Upload Card */}
           <IjazahUploader studentId={student.id} existingUrl={student.ijazahUrl} />

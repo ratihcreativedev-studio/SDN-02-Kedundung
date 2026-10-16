@@ -83,3 +83,8 @@ next-env.d.ts
 !prisma/sql/20261016_grade_excel_format.sql
 !prisma/sql/20261016_student_reports.sql
 !prisma/sql/20261016_report_class_snapshot.sql
+
+# Annual attendance Excel schema
+!prisma/sql/20261016_attendance_recaps.sql
+
+!prisma/sql/20261016_attendance_semesters.sql

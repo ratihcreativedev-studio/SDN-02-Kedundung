@@ -3,7 +3,6 @@ import { db } from '@/lib/db'
 type DashboardCounts = {
   students: number
   classes: number
-  subjects: number
   achievements: number
   announcements: number
 }
@@ -15,7 +14,6 @@ export async function getDashboardSummary() {
       SELECT
         (SELECT COUNT(*)::int FROM students WHERE status = 'active') AS students,
         (SELECT COUNT(*)::int FROM classes) AS classes,
-        (SELECT COUNT(*)::int FROM subjects) AS subjects,
         (SELECT COUNT(*)::int FROM achievements) AS achievements,
         (SELECT COUNT(*)::int FROM announcements) AS announcements
     `,

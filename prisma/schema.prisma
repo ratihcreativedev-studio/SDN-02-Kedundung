@@ -81,6 +81,7 @@ model Class {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  attendanceRecaps AttendanceRecap[]
   reports  StudentReport[]
   students Student[]
   homeroom Profile?       @relation("ClassHomeroom", fields: [homeroomId], references: [id], onDelete: SetNull)
@@ -124,6 +125,7 @@ model Student {
   class        Class?        @relation(fields: [classId], references: [id], onDelete: SetNull)
   reports      StudentReport[]
   grades       Grade[]
+  attendanceRecaps AttendanceRecap[]
   attendances  Attendance[]
   achievements Achievement[]
 
@@ -250,4 +252,25 @@ model StudentReport {
   @@index([classId, semester])
   @@unique([studentId, semester])
   @@map("student_reports")
+}
+
+// Excel semester recap: NISN/NAMA identify the student; IJIN/ALPA map to izin/alpha.
+model AttendanceRecap {
+  id           String @id @default(cuid())
+  classId      String?
+  studentId    String
+  semester String
+  hadir        Int
+  sakit        Int
+  izin         Int
+  alpha        Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  class   Class? @relation(fields: [classId], references: [id], onDelete: SetNull)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, semester])
+  @@index([classId, semester])
+  @@map("attendance_recaps")
 }

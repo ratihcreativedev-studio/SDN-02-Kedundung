@@ -20,10 +20,6 @@ export const gradeQueries = {
     })
   },
 
-  countByClassSemester: (semester: string) => db.studentReport.groupBy({
-    by: ['classId'], where: { semester }, _count: { _all: true },
-  }),
-
   updateOne: (classId: string, semester: string, studentId: string, values: { uh: number; asts: number; asas: number; score: number }) =>
     db.studentReport.updateMany({ where: { classId, semester, studentId }, data: values }),
 

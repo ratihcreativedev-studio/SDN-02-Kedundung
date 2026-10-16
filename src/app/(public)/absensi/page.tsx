@@ -1,5 +1,7 @@
-import { AbsensiContent } from "@/components/absensi/absensi-content";
+import { AbsensiContent } from '@/components/absensi/absensi-content'
 
-export default function AbsensiPage() {
-  return <AbsensiContent />;
+export default async function AbsensiPage({ searchParams }: {
+  searchParams: Promise<{ classId?: string; semester?: string }>
+}) {
+  return <AbsensiContent params={await searchParams} />
 }

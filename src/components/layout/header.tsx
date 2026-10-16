@@ -4,6 +4,7 @@ import { useNotifiedAction } from '@/components/ui/notification-provider'
 
 import { useConfirmation } from '@/components/ui/confirmation-dialog'
 
+import Image from 'next/image'
 import { Menu, LogOut, ChevronRight } from 'lucide-react'
 import { useRouter, usePathname } from 'next/navigation'
 import { logoutAction } from '@/features/auth/actions'
@@ -16,7 +17,6 @@ function getPageTitle(pathname: string): string {
     '/admin/alumni': 'Data Alumni',
     '/admin/kelas': 'Data Kelas',
     '/admin/guru': 'Guru & Staff',
-    '/admin/mata-pelajaran': 'Mata Pelajaran',
     '/admin/absensi': 'Absensi',
     '/admin/nilai': 'Daftar Nilai',
     '/admin/prestasi': 'Prestasi',
@@ -89,7 +89,10 @@ export function Header({
         {/* Avatar */}
         <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary to-primary-light font-bold text-white text-xs overflow-hidden ring-2 ring-primary/10 ring-offset-1 ring-offset-white">
           {photoURL ? (
-            <img
+            <Image
+              width={36}
+              height={36}
+              unoptimized
               src={photoURL}
               alt="Profile"
               className="h-full w-full object-cover"

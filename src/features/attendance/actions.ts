@@ -3,73 +3,75 @@
 import { revalidatePath } from 'next/cache'
 import { requireAdminEmail } from '@/lib/auth'
 import { attendanceQueries } from './queries'
-import * as xlsx from 'xlsx'
-import { z } from 'zod'
+import { studentQueries } from '@/features/students/queries'
+import { parseAttendanceWorkbook } from './excel'
+import { attendanceScopeSchema, editAttendanceSchema } from './schemas'
 
-const excelRowSchema = z.object({
-  NISN: z.coerce.string(),
-  Nama: z.string().optional(),
-  Hadir: z.coerce.number().min(0).default(0),
-  Sakit: z.coerce.number().min(0).default(0),
-  Izin: z.coerce.number().min(0).default(0),
-  Alpha: z.coerce.number().min(0).default(0),
-})
+function refreshAttendance() {
+  revalidatePath('/admin/absensi')
+  revalidatePath('/absensi')
+  revalidatePath('/admin/data-siswa', 'layout')
+  revalidatePath('/data-siswa', 'layout')
+}
 
 export async function uploadAttendanceAction(formData: FormData) {
   try {
     await requireAdminEmail()
     
     const file = formData.get('file') as File
-    const monthYear = String(formData.get('monthYear') ?? '')
-    const studentsDataStr = String(formData.get('students') ?? '[]')
-
-    if (!file || !monthYear) {
-      return { error: 'File dan Bulan wajib diisi' }
+    const scope = attendanceScopeSchema.safeParse({ classId: formData.get('classId'), semester: formData.get('semester') })
+    if (!file || typeof file.arrayBuffer !== 'function' || !scope.success) {
+      return { error: 'File, kelas, dan semester/tahun ajaran yang valid wajib diisi.' }
     }
+    const { classId, semester } = scope.data
 
-    // Parse existing students in this class to validate NISN
-    const studentsInClass = JSON.parse(studentsDataStr) as { id: string; nisn: string }[]
+    const studentsInClass = await studentQueries.findAcademicRoster(classId)
     const studentMap = new Map(studentsInClass.map(s => [s.nisn, s.id]))
 
-    // Read Excel File
-    const arrayBuffer = await file.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
-    const workbook = xlsx.read(buffer, { type: 'buffer' })
-    
-    const firstSheetName = workbook.SheetNames[0]
-    const worksheet = workbook.Sheets[firstSheetName]
-    const data = xlsx.utils.sheet_to_json(worksheet)
-
-    const recordsToSave: { studentId: string; monthYear: string; hadir: number; sakit: number; izin: number; alpha: number }[] = []
-
-    for (const row of data as any[]) {
-      const parsed = excelRowSchema.safeParse(row)
-      if (parsed.success) {
-        const studentId = studentMap.get(parsed.data.NISN)
-        if (studentId) {
-          recordsToSave.push({
-            studentId,
-            monthYear,
-            hadir: parsed.data.Hadir,
-            sakit: parsed.data.Sakit,
-            izin: parsed.data.Izin,
-            alpha: parsed.data.Alpha,
-          })
-        }
+    const rows = parseAttendanceWorkbook(Buffer.from(await file.arrayBuffer()))
+    const recordsToSave: Parameters<typeof attendanceQueries.upsertMany>[0] = []
+    for (const row of rows) {
+      const studentId = studentMap.get(row.nisn)
+      if (!studentId) {
+        return { error: 'Ada NISN pada Excel yang tidak terdaftar di kelas terpilih. Periksa NISN dan pilihan kelas; belum ada absensi yang disimpan.' }
       }
-    }
-
-    if (recordsToSave.length === 0) {
-      return { error: 'Tidak ada data valid yang bisa diproses. Pastikan format kolom sesuai: NISN, Nama, Hadir, Sakit, Izin, Alpha.' }
+      recordsToSave.push({ classId, studentId, semester, hadir: row.hadir, sakit: row.sakit, izin: row.izin, alpha: row.alpha })
     }
 
     await attendanceQueries.upsertMany(recordsToSave)
     
-    revalidatePath('/admin/absensi')
-    revalidatePath('/admin/data-siswa')
+    refreshAttendance()
     return { success: true }
   } catch (err) {
     console.error(err)
-    return { error: err instanceof Error ? err.message : 'Terjadi kesalahan saat memproses file.' }
+    return { error: err instanceof Error ? err.message : 'Terjadi kesalahan saat memproses file Excel.' }
+  }
+}
+
+export async function editAttendanceAction(formData: FormData) {
+  try {
+    await requireAdminEmail()
+    const parsed = editAttendanceSchema.safeParse(Object.fromEntries(formData))
+    if (!parsed.success) return { error: 'Periksa kelas, semester/tahun ajaran, dan absensi. Jumlah hari wajib berupa bilangan bulat nonnegatif.' }
+    const { classId, semester, studentId, ...values } = parsed.data
+    const result = await attendanceQueries.updateOne(classId, semester, studentId, values)
+    if (result.count !== 1) return { error: 'Absensi siswa tidak ditemukan pada kelas dan semester/tahun ajaran ini. Muat ulang halaman.' }
+    refreshAttendance()
+    return { success: true }
+  } catch {
+    return { error: 'Absensi gagal diperbarui. Silakan coba lagi.' }
+  }
+}
+
+export async function deleteAttendanceRecapAction(formData: FormData) {
+  try {
+    await requireAdminEmail()
+    const parsed = attendanceScopeSchema.safeParse(Object.fromEntries(formData))
+    if (!parsed.success) return { error: 'Kelas dan semester/tahun ajaran wajib valid.' }
+    await attendanceQueries.deleteByClassSemester(parsed.data.classId, parsed.data.semester)
+    refreshAttendance()
+    return { success: true }
+  } catch {
+    return { error: 'Rekap absensi gagal dihapus. Silakan coba lagi.' }
   }
 }

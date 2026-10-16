@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "test": "node --test scripts/*.test.cjs",
+    "test:integration": "RUN_DATABASE_TESTS=1 node --test scripts/semester-recaps.integration.test.cjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",

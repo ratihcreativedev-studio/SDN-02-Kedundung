@@ -46,6 +46,7 @@ export async function createStudentAction(formData: FormData) {
   try {
     await studentService.create(parsed.data)
     revalidatePath('/admin/data-siswa')
+    revalidatePath('/data-siswa', 'layout')
     revalidatePath('/admin/alumni')
     revalidatePath('/admin')
     return { success: true }
@@ -67,9 +68,10 @@ export async function updateStudentAction(id: string, formData: FormData) {
   try {
     await studentService.update(id, parsed.data)
     revalidatePath(`/admin/data-siswa/${id}`)
-    revalidatePath('/data-siswa')
+    revalidatePath('/data-siswa', 'layout')
     revalidatePath(`/data-siswa/${parsed.data.nisn}`)
     revalidatePath('/admin/data-siswa')
+    revalidatePath('/data-siswa', 'layout')
     revalidatePath('/admin/alumni')
     revalidatePath('/admin')
     return { success: true }
@@ -88,6 +90,7 @@ export async function deleteStudentAction(id: string) {
   try {
     await studentService.delete(id)
     revalidatePath('/admin/data-siswa')
+    revalidatePath('/data-siswa', 'layout')
     revalidatePath('/admin/alumni')
     revalidatePath('/admin')
     return { success: true }
@@ -112,16 +115,18 @@ export async function uploadIjazahAction(studentId: string, formData: FormData) 
 
     const student = await studentService.getById(studentId)
 
-    // Delete existing if any
-    if (student.ijazahUrl) {
-      await storageService.deleteDocument(student.ijazahUrl)
-    }
-
     const url = await storageService.uploadDocument(file, 'ijazah')
-    await studentService.updateIjazahUrl(studentId, url)
+    try {
+      await studentService.updateIjazahUrl(studentId, url)
+    } catch (error) {
+      await storageService.deleteDocument(url).catch(() => {})
+      throw error
+    }
+    // Retire the old file only after the new URL is safely stored.
+    if (student.ijazahUrl) await storageService.deleteDocument(student.ijazahUrl).catch(() => {})
 
     revalidatePath(`/admin/data-siswa/${studentId}`)
-    revalidatePath('/data-siswa')
+    revalidatePath('/data-siswa', 'layout')
     return { success: true }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Terjadi kesalahan saat mengunggah' }
@@ -134,12 +139,12 @@ export async function deleteIjazahAction(studentId: string) {
     const student = await studentService.getById(studentId)
 
     if (student.ijazahUrl) {
-      await storageService.deleteDocument(student.ijazahUrl)
-      await studentService.updateIjazahUrl(studentId, null as any)
+      await studentService.updateIjazahUrl(studentId, null)
+      await storageService.deleteDocument(student.ijazahUrl).catch(() => {})
     }
 
     revalidatePath(`/admin/data-siswa/${studentId}`)
-    revalidatePath('/data-siswa')
+    revalidatePath('/data-siswa', 'layout')
     return { success: true }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Terjadi kesalahan saat menghapus ijazah' }
@@ -147,13 +152,13 @@ export async function deleteIjazahAction(studentId: string) {
 }
 
 import { gradeQueries } from '@/features/grades/queries'
-import { attendanceQueries } from '@/features/attendance/queries'
+import { getStudentAttendanceHistory } from '@/features/attendance/student-history'
 
 export async function getStudentByNISNAction(nisn: string) {
   try {
     const student = await studentService.getByNisn(nisn)
     const grades = await gradeQueries.findByStudent(student.id)
-    const attendances = await attendanceQueries.findByStudent(student.id)
+    const attendanceHistory = await getStudentAttendanceHistory(student.id)
 
     const gradeDetails = grades.map(g => ({
       id: g.id,
@@ -164,31 +169,12 @@ export async function getStudentByNISNAction(nisn: string) {
       asas: g.asas,
     }))
 
-    const monthlyAttendances = (attendances as any[]).map((att: any) => {
-      const hadir = att.hadir || 0
-      const sakit = att.sakit || 0
-      const izin = att.izin || 0
-      const alpha = att.alpha || 0
-      const totalHari = hadir + sakit + izin + alpha
-      const persentase = totalHari > 0 ? Math.round((hadir / totalHari) * 100) : 0
-      return {
-        id: att.id,
-        month: att.monthYear,
-        hadir,
-        sakit,
-        izin,
-        alpha,
-        totalHari,
-        persentase,
-      }
-    })
-
     return { 
       success: true, 
       data: {
         ...student,
         gradeDetails,
-        monthlyAttendances
+        attendanceHistory
       }
     }
   } catch (err) {

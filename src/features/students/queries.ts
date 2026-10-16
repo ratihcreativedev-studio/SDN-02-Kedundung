@@ -1,4 +1,5 @@
 import { db } from '@/lib/db'
+import type { Prisma } from '@prisma/client'
 import type { StudentInput } from './schemas'
 
 export const studentQueries = {
@@ -11,7 +12,7 @@ export const studentQueries = {
     const { classId, search, sortBy = 'name', sortOrder = 'asc', page = 1, limit = 10 } = params || {}
     const skip = (page - 1) * limit
 
-    const where: any = {}
+    const where: Prisma.StudentWhereInput = {}
     if (classId) where.classId = classId
     if (search) {
       where.OR = [
@@ -20,9 +21,11 @@ export const studentQueries = {
       ]
     }
 
-    let orderBy: any = { [sortBy]: sortOrder }
+    const safeSort = ['name', 'nisn', 'createdAt', 'status'].includes(sortBy) ? sortBy : 'name'
+    const direction = sortOrder === 'desc' ? 'desc' : 'asc'
+    let orderBy: Prisma.StudentOrderByWithRelationInput = { [safeSort]: direction }
     if (sortBy === 'class') {
-      orderBy = { class: { name: sortOrder } }
+      orderBy = { class: { name: direction } }
     }
 
     return db.student.findMany({
@@ -35,7 +38,7 @@ export const studentQueries = {
   },
   countAll: (params?: { classId?: string; search?: string }) => {
     const { classId, search } = params || {}
-    const where: any = {}
+    const where: Prisma.StudentWhereInput = {}
     if (classId) where.classId = classId
     if (search) {
       where.OR = [
@@ -65,13 +68,13 @@ export const studentQueries = {
           { nipd: identifier },
         ],
       },
-      include: { class: true },
+      include: { class: true, achievements: { orderBy: [{ date: 'desc' }, { createdAt: 'desc' }] } },
     })
   },
   create: (data: StudentInput) => {
     return db.student.create({ data })
   },
-  update: (id: string, data: any) => {
+  update: (id: string, data: Prisma.StudentUncheckedUpdateInput) => {
     return db.student.update({
       where: { id },
       data,

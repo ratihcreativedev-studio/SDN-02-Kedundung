@@ -27,26 +27,8 @@ export function CardTitle({ className = "", ...props }: React.HTMLAttributes<HTM
   )
 }
 
-export function CardDescription({ className = "", ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
-  return (
-    <p
-      className={`text-sm text-text-secondary ${className}`}
-      {...props}
-    />
-  )
-}
-
 export function CardContent({ className = "", ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={`p-6 pt-0 ${className}`} {...props} />
-  )
-}
-
-export function CardFooter({ className = "", ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={`flex items-center p-6 pt-0 ${className}`}
-      {...props}
-    />
   )
 }

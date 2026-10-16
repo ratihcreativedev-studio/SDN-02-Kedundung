@@ -3,8 +3,8 @@ import { z } from 'zod'
 const optionalString = z.string().optional().transform(v => v === "" ? null : v)
 
 export const studentSchema = z.object({
-  nisn: z.string().min(1, 'NISN wajib diisi'),
-  name: z.string().min(1, 'Nama wajib diisi'),
+  nisn: z.string().trim().regex(/^\d{10}$/, 'NISN wajib terdiri dari 10 digit'),
+  name: z.string().trim().min(1, 'Nama wajib diisi'),
   classId: optionalString.nullable(),
   status: z.enum(['active', 'inactive', 'graduate']).optional(),
   graduationDate: z.union([z.iso.date(), z.literal('')]).optional()
@@ -13,7 +13,7 @@ export const studentSchema = z.object({
   nipd: optionalString,
   gender: optionalString,
   birthPlace: optionalString,
-  birthDate: z.string().optional().transform(v => (v && v !== "" ? new Date(v) : null)),
+  birthDate: z.union([z.iso.date(), z.literal('')]).optional().transform(v => v ? new Date(`${v}T00:00:00.000Z`) : null),
   nik: optionalString,
   religion: optionalString,
   address: optionalString,
