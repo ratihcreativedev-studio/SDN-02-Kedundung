@@ -1,10 +1,7 @@
 import {
   Apple,
   BookOpen,
-  ClipboardList,
   Dumbbell,
-  FileText,
-  Heart,
   Moon,
   Star,
   Sun,
@@ -16,53 +13,6 @@ import dataNilai from "./dataNilai.json";
 import tataTertibData from "./tataTertib.json";
 
 export { dataAbsensi, dataNilai, tataTertibData };
-
-export const homeFeatures = [
-  {
-    icon: Users,
-    title: "Data Peserta Didik",
-    desc: "Data lengkap 175 siswa dari Kelas 1 hingga Kelas 6",
-    href: "/data-siswa",
-    color: "from-blue-500 to-blue-600",
-  },
-  {
-    icon: ClipboardList,
-    title: "Absensi Siswa",
-    desc: "Rekap kehadiran siswa per kelas dan per bulan",
-    href: "/absensi",
-    color: "from-emerald-500 to-emerald-600",
-  },
-  {
-    icon: FileText,
-    title: "Daftar Nilai",
-    desc: "Nilai Ulangan Harian dan Ulangan Akhir Semester",
-    href: "/daftar-nilai",
-    color: "from-violet-500 to-violet-600",
-  },
-  {
-    icon: Heart,
-    title: "Gerakan 7 KAIH",
-    desc: "7 Kebiasaan Anak Indonesia Hebat - Penilaian Karakter",
-    href: "/gerakan-7kaih",
-    color: "from-rose-500 to-rose-600",
-  },
-  {
-    icon: BookOpen,
-    title: "Tata Tertib",
-    desc: "Peraturan dan ketentuan siswa SDN Kedundung 2",
-    href: "/tata-tertib",
-    color: "from-amber-500 to-amber-600",
-  },
-];
-
-export const misiPoints = [
-  "Membangun lingkungan sekolah yang membentuk pendidik dan murid memiliki akhlak mulia melalui rutinitas kegiatan keagamaan dan menerapkan ajaran agama melalui cara berinteraksi di sekolah.",
-  "Merancang pembelajaran yang berkesadaran, bermakna, menarik dan menyenangkan yang mampu memotivasi murid untuk selalu belajar dan menemukan pembelajaran.",
-  "Membangun kepedulian terhadap lingkungan sekolah, bertoleransi dalam kewargaan, mencintai budaya lokal dan menjunjung nilai gotong royong yang terintegrasi dalam pembelajaran.",
-  "Mengembangkan kemandirian, nalar kritis dan kreativitas yang memfasilitasi keragaman minat dan bakat murid.",
-  "Mengembangkan program sekolah yang membentuk ide dan gagasan cepat tanggap terhadap perubahan yang terjadi untuk merancang inovasi.",
-  "Mengembangkan dan memfasilitasi peningkatan prestasi murid sesuai minat dan bakatnya melalui proses pendampingan dan kerja sama dengan orang tua.",
-];
 
 export const kebiasaan7Kaih = [
   {

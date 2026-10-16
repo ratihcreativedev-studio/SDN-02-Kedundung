@@ -78,3 +78,8 @@ next-env.d.ts
 
 /src/generated/prisma
 *.sql
+
+# Schema update required by the school grade Excel format
+!prisma/sql/20261016_grade_excel_format.sql
+!prisma/sql/20261016_student_reports.sql
+!prisma/sql/20261016_report_class_snapshot.sql

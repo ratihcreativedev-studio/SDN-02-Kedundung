@@ -81,6 +81,7 @@ model Class {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  reports  StudentReport[]
   students Student[]
   homeroom Profile?       @relation("ClassHomeroom", fields: [homeroomId], references: [id], onDelete: SetNull)
   subjects ClassSubject[]
@@ -121,6 +122,7 @@ model Student {
   updatedAt DateTime @updatedAt
 
   class        Class?        @relation(fields: [classId], references: [id], onDelete: SetNull)
+  reports      StudentReport[]
   grades       Grade[]
   attendances  Attendance[]
   achievements Achievement[]
@@ -158,11 +160,15 @@ model Grade {
   studentId String
   subjectId String
   semester  String // misal: "Ganjil 2023/2024"
+  uh        Float?
+  asts      Float?
+  asas      Float?
+  // Legacy components retained without guessing their equivalence to the new format.
   uh1       Float?
   uh2       Float?
   uh3       Float?
   uas       Float?
-  score     Float
+  score     Float // Nilai Rapor, imported directly from Excel
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -223,4 +229,25 @@ model AdminWhitelist {
   updatedAt DateTime @updatedAt
 
   @@map("admin_whitelist")
+}
+
+// One Excel report per student and semester; legacy subject grades remain archived.
+model StudentReport {
+  id        String   @id @default(cuid())
+  classId   String?
+  studentId String
+  semester  String
+  uh        Float
+  asts      Float
+  asas      Float
+  score     Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  class   Class?  @relation(fields: [classId], references: [id], onDelete: SetNull)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([classId, semester])
+  @@unique([studentId, semester])
+  @@map("student_reports")
 }

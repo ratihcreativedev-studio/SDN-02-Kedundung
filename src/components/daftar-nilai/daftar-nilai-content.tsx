@@ -1,53 +1,20 @@
-"use client";
+import { getGradePageData } from '@/features/grades/page-data'
+import { GradeFilter } from '@/features/grades/components/GradeFilter'
+import { DaftarNilaiTable } from './daftar-nilai-table'
 
-import { useMemo, useState } from "react";
-
-import { dataNilai } from "@/data";
-import { DaftarNilaiFilters } from "./daftar-nilai-filters";
-import { DaftarNilaiHero } from "./daftar-nilai-hero";
-import { DaftarNilaiLegend } from "./daftar-nilai-legend";
-import { DaftarNilaiTable } from "./daftar-nilai-table";
-
-export function DaftarNilaiContent() {
-  const [kelas, setKelas] = useState("Kelas 1");
-  const [mapel, setMapel] = useState("Semua");
-
-  const kelasList = useMemo(
-    () => Array.from(new Set(dataNilai.map((n) => n.kelas))).sort(),
-    []
-  );
-  const mapelList = useMemo(
-    () => ["Semua", ...Array.from(new Set(dataNilai.map((n) => n.mapel)))],
-    []
-  );
-
-  const filtered = useMemo(() => {
-    let data = dataNilai.filter((n) => n.kelas === kelas);
-    if (mapel !== "Semua") data = data.filter((n) => n.mapel === mapel);
-    
-    // Sort by name, then by mapel
-    return data.sort((a, b) => {
-      const nameComp = a.nama.localeCompare(b.nama);
-      if (nameComp !== 0) return nameComp;
-      return a.mapel.localeCompare(b.mapel);
-    });
-  }, [kelas, mapel]);
-
+export async function DaftarNilaiContent({ params }: { params: { classId?: string; semester?: string } }) {
+  const { classes, classId, semester, students, gradeMap } = await getGradePageData(params)
   return (
     <div className="page-shell">
-      <div className="page-container">
-        <DaftarNilaiHero kelas={kelas} mapel={mapel} />
-        <DaftarNilaiFilters
-          kelas={kelas}
-          kelasList={kelasList}
-          mapel={mapel}
-          mapelList={mapelList}
-          onKelasChange={setKelas}
-          onMapelChange={setMapel}
-        />
-        <DaftarNilaiLegend />
-        <DaftarNilaiTable rows={filtered} />
+      <div className="page-container space-y-6">
+        <div className="page-hero">
+          <h1 className="text-3xl font-bold text-primary">Daftar Nilai</h1>
+          <p className="mt-2 text-text-secondary">Nilai siswa sesuai format Excel: UH, ASTS, ASAS, dan Nilai Rapor.</p>
+        </div>
+        <GradeFilter key={`${classId}-${semester}`} basePath="/daftar-nilai" classes={classes} classId={classId} semester={semester}>
+        <DaftarNilaiTable rows={students.map(student => ({ ...student, ...gradeMap[student.id] }))} />
+        </GradeFilter>
       </div>
     </div>
-  );
+  )
 }

@@ -1,39 +1,45 @@
 'use client'
 
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useTransition, type ReactNode } from 'react'
 
 export function GradeFilter({
+  basePath = '/admin/nilai',
   classes,
-  subjects,
   classId,
-  subjectId,
   semester,
+  children,
 }: {
+  basePath?: '/admin/nilai' | '/daftar-nilai'
   classes: { id: string; name: string }[]
-  subjects: { id: string; name: string }[]
   classId: string
-  subjectId: string
   semester: string
+  children?: ReactNode
 }) {
   const router = useRouter()
+  const [isPending, startTransition] = useTransition()
   const [cls, setCls] = useState(classId)
-  const [subj, setSubj] = useState(subjectId)
   const [sem, setSem] = useState(semester)
+  const selectedYear = Number(semester.match(/(20\d{2})\//)?.[1] ?? 2025)
+  const lastYear = Math.min(2098, Math.max(new Date().getFullYear() + 3, selectedYear))
+  const firstYear = Math.min(2025, selectedYear)
+  const semesters = Array.from({ length: lastYear - firstYear + 1 }, (_, index) => firstYear + index)
+    .flatMap(year => [`Ganjil ${year}/${year + 1}`, `Genap ${year}/${year + 1}`])
 
-  const handleSubmit = () => {
-    const params = new URLSearchParams({ classId: cls, subjectId: subj, semester: sem })
-    router.push(`/admin/nilai?${params.toString()}`)
+  const applyFilters = (nextClass: string, nextSemester: string) => {
+    const params = new URLSearchParams({ classId: nextClass, semester: nextSemester })
+    startTransition(() => router.push(`${basePath}?${params.toString()}`, { scroll: false }))
   }
 
   return (
+    <>
     <div className="section-card flex flex-col gap-4 p-5 sm:flex-row sm:flex-wrap sm:items-end animate-fade-in-up animate-delay-100">
       <label className="space-y-2 sm:flex-1 sm:min-w-35">
         <span className="block text-sm font-semibold text-primary">Kelas</span>
         <select
           value={cls}
-          onChange={(e) => setCls(e.target.value)}
+          onChange={(e) => { setCls(e.target.value); applyFilters(e.target.value, sem) }}
+          disabled={isPending}
           className="w-full h-11 rounded-xl border border-border bg-white px-4 text-sm text-primary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
         >
           {classes.map((c) => (
@@ -43,47 +49,23 @@ export function GradeFilter({
       </label>
 
       <label className="space-y-2 sm:flex-1 sm:min-w-40">
-        <span className="block text-sm font-semibold text-primary">Mata Pelajaran</span>
-        <select
-          value={subj}
-          onChange={(e) => setSubj(e.target.value)}
-          className="w-full h-11 rounded-xl border border-border bg-white px-4 text-sm text-primary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
-        >
-          {subjects.map((s) => (
-            <option key={s.id} value={s.id}>{s.name}</option>
-          ))}
-        </select>
-      </label>
-
-      <label className="space-y-2 sm:flex-1 sm:min-w-40">
         <span className="block text-sm font-semibold text-primary">Semester</span>
         <select
           value={sem}
-          onChange={(e) => setSem(e.target.value)}
+          onChange={(e) => { setSem(e.target.value); applyFilters(cls, e.target.value) }}
+          disabled={isPending}
           className="w-full h-11 rounded-xl border border-border bg-white px-4 text-sm text-primary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
         >
-          <option value="Ganjil 2025/2026">Ganjil 2025/2026</option>
-          <option value="Genap 2025/2026">Genap 2025/2026</option>
-          <option value="Ganjil 2026/2027">Ganjil 2026/2027</option>
-          <option value="Genap 2026/2027">Genap 2026/2027</option>
+          {semesters.map(value => <option key={value} value={value}>{value}</option>)}
         </select>
       </label>
 
-      <div className="flex gap-3 sm:flex-none">
-        <button
-          type="button"
-          onClick={handleSubmit}
-          className="h-11 rounded-xl bg-primary px-6 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/30"
-        >
-          Tampilkan
-        </button>
-        <Link
-          href="/admin/nilai"
-          className="inline-flex h-11 items-center justify-center rounded-xl border border-border bg-white px-6 text-sm font-medium text-text-secondary transition-all hover:bg-surface-alt hover:text-primary shadow-sm"
-        >
-          Reset
-        </Link>
-      </div>
     </div>
+    {isPending ? (
+      <div role="status" aria-live="polite" className="section-card p-8 text-center text-sm text-text-secondary">
+        Memuat nilai {classes.find(item => item.id === cls)?.name ?? 'kelas'} · {sem}...
+      </div>
+    ) : children}
+    </>
   )
 }

@@ -17,6 +17,7 @@
     "firebase": "^12.14.0",
     "lucide-react": "^0.469.0",
     "next": "^16.2.6",
+    "nextjs-toploader": "^3.9.17",
     "pg": "^8.21.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",

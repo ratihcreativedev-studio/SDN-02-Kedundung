@@ -1,16 +1,11 @@
+import { StudentGradeTable } from '@/features/grades/components/StudentGradeTable'
 import { getStudentByNISNAction } from '@/features/students/actions'
 import Link from 'next/link'
-import { ArrowLeft, User, BookOpen, CalendarDays, Download, Award, CheckCircle2, AlertTriangle, XCircle, Info, StickyNote } from 'lucide-react'
+import { ArrowLeft, User, BookOpen, CalendarDays, Download, Award, CheckCircle2, Info, StickyNote } from 'lucide-react'
 
 export async function generateMetadata({ params }: { params: Promise<{ nisn: string }> }) {
   const resolvedParams = await params
   return { title: `Hasil Pencarian Siswa: ${resolvedParams.nisn} | SIPANDA` }
-}
-
-const getScoreColor = (score: number) => {
-  if (score >= 75) return 'text-emerald-700 bg-emerald-50 border-emerald-200'
-  if (score >= 60) return 'text-amber-700 bg-amber-50 border-amber-200'
-  return 'text-rose-700 bg-rose-50 border-rose-200'
 }
 
 export default async function PublicStudentDetailPage({ params }: { params: Promise<{ nisn: string }> }) {
@@ -167,7 +162,7 @@ export default async function PublicStudentDetailPage({ params }: { params: Prom
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-primary">Daftar Nilai</h3>
-                    <p className="text-xs text-text-secondary">Rincian nilai mata pelajaran dan ujian</p>
+                    <p className="text-xs text-text-secondary">Rincian UH, ASTS, ASAS, dan Nilai Rapor per semester</p>
                   </div>
                 </div>
                 {studentData.gradeDetails && studentData.gradeDetails.length > 0 && (
@@ -180,68 +175,8 @@ export default async function PublicStudentDetailPage({ params }: { params: Prom
 
               {studentData.gradeDetails && studentData.gradeDetails.length > 0 ? (
                 <div className="space-y-5">
-                  {/* Detailed Table */}
-                  <div className="overflow-x-auto rounded-xl border border-border">
-                    <table className="w-full text-left text-sm">
-                      <thead className="bg-surface-alt/70 text-text-secondary text-xs uppercase tracking-wider font-semibold border-b border-border">
-                        <tr>
-                          <th className="px-4 py-3">Mata Pelajaran</th>
-                          <th className="px-3 py-3 text-center">Semester</th>
-                          <th className="px-3 py-3 text-center">UH 1</th>
-                          <th className="px-3 py-3 text-center">UH 2</th>
-                          <th className="px-3 py-3 text-center">UH 3</th>
-                          <th className="px-3 py-3 text-center">UAS</th>
-                          <th className="px-4 py-3 text-center font-bold">Nilai Akhir</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border text-xs sm:text-sm">
-                        {studentData.gradeDetails.map((grade: any) => (
-                          <tr key={grade.id} className="hover:bg-surface-alt/40 transition-colors">
-                            <td className="px-4 py-3 font-semibold text-primary">
-                              {grade.subjectName}
-                            </td>
-                            <td className="px-3 py-3 text-center text-text-secondary">
-                              {grade.semester || '-'}
-                            </td>
-                            <td className="px-3 py-3 text-center text-text-secondary">
-                              {grade.uh1 ?? '-'}
-                            </td>
-                            <td className="px-3 py-3 text-center text-text-secondary">
-                              {grade.uh2 ?? '-'}
-                            </td>
-                            <td className="px-3 py-3 text-center text-text-secondary">
-                              {grade.uh3 ?? '-'}
-                            </td>
-                            <td className="px-3 py-3 text-center text-text-secondary">
-                              {grade.uas ?? '-'}
-                            </td>
-                            <td className="px-4 py-3 text-center font-bold">
-                              <span className={`inline-block px-2.5 py-1 rounded-lg border font-bold text-xs ${getScoreColor(grade.score)}`}>
-                                {grade.score}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <StudentGradeTable grades={studentData.gradeDetails} />
 
-                  {/* Summary Averages if available */}
-                  {studentData.averages && studentData.averages.length > 0 && (
-                    <div className="bg-surface-alt/40 p-4 rounded-xl border border-border">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-3">
-                        Rata-Rata per Mata Pelajaran
-                      </h4>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                        {studentData.averages.map((avg: any) => (
-                          <div key={avg.name} className="flex justify-between items-center bg-white px-3 py-2 rounded-lg border border-border text-xs">
-                            <span className="font-medium text-text-secondary truncate pr-2">{avg.name}</span>
-                            <span className="font-bold text-primary shrink-0">{avg.avg}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
               ) : (
                 <div className="text-center py-8 bg-surface-alt/30 rounded-xl border border-dashed border-border">

@@ -2,10 +2,10 @@ import { FileText } from "lucide-react";
 
 type DaftarNilaiHeroProps = {
   kelas: string;
-  mapel: string;
+  semester: string;
 };
 
-export function DaftarNilaiHero({ kelas, mapel }: DaftarNilaiHeroProps) {
+export function DaftarNilaiHero({ kelas, semester }: DaftarNilaiHeroProps) {
   return (
     <div className="page-hero">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -32,9 +32,9 @@ export function DaftarNilaiHero({ kelas, mapel }: DaftarNilaiHeroProps) {
           </div>
           <div className="rounded-2xl bg-white/80 p-4 shadow-sm">
             <div className="text-xs uppercase tracking-[0.16em] text-text-muted">
-              Mapel
+              Semester
             </div>
-            <div className="mt-1 text-lg font-bold text-primary">{mapel}</div>
+            <div className="mt-1 text-lg font-bold text-primary">{semester}</div>
           </div>
         </div>
       </div>

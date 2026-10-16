@@ -89,7 +89,7 @@ export function Gerakan7KaihJourneySection() {
                   mereka.
                 </p>
                 <a
-                  href="https://forms.gle/5zg38KJu4UPa4GiD8"
+                  href="https://docs.google.com/forms/d/e/1FAIpQLSfmlUY6oM8-JIWhyRRqWVSpy1LWQhI3z_HzHOtVC-sxGcUK2A/viewform?usp=publish-editor"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group/btn inline-flex items-center gap-3 rounded-2xl bg-secondary px-10 py-5 text-lg font-black text-primary-dark shadow-xl shadow-secondary/20 transition-all duration-300 hover:-translate-y-1 hover:bg-secondary-light hover:shadow-2xl"

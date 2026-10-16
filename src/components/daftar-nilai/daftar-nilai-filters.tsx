@@ -3,19 +3,19 @@ import { Filter } from "lucide-react";
 type DaftarNilaiFiltersProps = {
   kelas: string;
   kelasList: string[];
-  mapel: string;
-  mapelList: string[];
+  semester: string;
+  semesterList: string[];
   onKelasChange: (value: string) => void;
-  onMapelChange: (value: string) => void;
+  onSemesterChange: (value: string) => void;
 };
 
 export function DaftarNilaiFilters({
   kelas,
   kelasList,
-  mapel,
-  mapelList,
+  semester,
+  semesterList,
   onKelasChange,
-  onMapelChange,
+  onSemesterChange,
 }: DaftarNilaiFiltersProps) {
   return (
     <div className="section-card mb-6 p-4 sm:p-5">
@@ -39,11 +39,11 @@ export function DaftarNilaiFilters({
         </div>
         <div className="sm:w-52">
           <select
-            value={mapel}
-            onChange={(e) => onMapelChange(e.target.value)}
+            value={semester}
+            onChange={(e) => onSemesterChange(e.target.value)}
             className="w-full h-[46px] appearance-none cursor-pointer rounded-xl border-0 bg-surface-alt px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20"
           >
-            {mapelList.map((m) => (
+            {semesterList.map((m) => (
               <option key={m} value={m}>
                 {m}
               </option>

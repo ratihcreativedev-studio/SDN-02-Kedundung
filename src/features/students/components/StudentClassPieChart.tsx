@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { PieChart, Pie, Cell } from "recharts";
 import { Users, GraduationCap, School, Percent } from "lucide-react";
 import {
   Card,
@@ -38,6 +38,62 @@ const PALETTE = [
   "#64748b", // Slate
 ];
 
+function CustomTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: Array<{
+    payload: {
+      fill: string;
+      name: string;
+      percentage: number;
+      homeroom: string;
+      value: number;
+    };
+  }>;
+}) {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="rounded-xl border border-border bg-white/95 p-4 shadow-2xl backdrop-blur-md transition-all">
+        <div className="flex items-center gap-2 mb-2.5 pb-2 border-b border-border/60">
+          <span
+            className="inline-block h-3.5 w-3.5 rounded-full ring-2 ring-white shadow-sm"
+            style={{ backgroundColor: data.fill }}
+          />
+          <span className="font-bold text-primary text-base">
+            {data.name}
+          </span>
+        </div>
+        <div className="space-y-2 text-xs">
+          <div className="flex items-center justify-between gap-4 bg-primary/5 px-2.5 py-1.5 rounded-lg border border-primary/10">
+            <span className="font-semibold text-primary flex items-center gap-1.5">
+              <Percent size={14} className="text-secondary" />
+              Persentase:
+            </span>
+            <span className="font-black text-secondary text-sm">{data.percentage}%</span>
+          </div>
+          <div className="flex items-start gap-2 text-text-secondary pt-0.5">
+            <GraduationCap size={15} className="mt-0.5 shrink-0 text-text-muted" />
+            <div>
+              <span className="font-semibold text-text-primary">Wali Kelas: </span>
+              <span>{data.homeroom}</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-text-secondary">
+            <Users size={15} className="shrink-0 text-primary-light" />
+            <div>
+              <span className="font-semibold text-text-primary">Jumlah Siswa: </span>
+              <span className="font-bold text-primary">{data.value} Siswa</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+}
 
 export function StudentClassPieChart({
   classes,
@@ -96,49 +152,6 @@ export function StudentClassPieChart({
     });
     return config;
   }, [chartSlices]);
-
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="rounded-xl border border-border bg-white/95 p-4 shadow-2xl backdrop-blur-md transition-all">
-          <div className="flex items-center gap-2 mb-2.5 pb-2 border-b border-border/60">
-            <span
-              className="inline-block h-3.5 w-3.5 rounded-full ring-2 ring-white shadow-sm"
-              style={{ backgroundColor: data.fill }}
-            />
-            <span className="font-bold text-primary text-base">
-              {data.name}
-            </span>
-          </div>
-          <div className="space-y-2 text-xs">
-            <div className="flex items-center justify-between gap-4 bg-primary/5 px-2.5 py-1.5 rounded-lg border border-primary/10">
-              <span className="font-semibold text-primary flex items-center gap-1.5">
-                <Percent size={14} className="text-secondary" />
-                Persentase:
-              </span>
-              <span className="font-black text-secondary text-sm">{data.percentage}%</span>
-            </div>
-            <div className="flex items-start gap-2 text-text-secondary pt-0.5">
-              <GraduationCap size={15} className="mt-0.5 shrink-0 text-text-muted" />
-              <div>
-                <span className="font-semibold text-text-primary">Wali Kelas: </span>
-                <span>{data.homeroom}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 text-text-secondary">
-              <Users size={15} className="shrink-0 text-primary-light" />
-              <div>
-                <span className="font-semibold text-text-primary">Jumlah Siswa: </span>
-                <span className="font-bold text-primary">{data.value} Siswa</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    return null;
-  };
 
   if (allClassData.length === 0) {
     return (

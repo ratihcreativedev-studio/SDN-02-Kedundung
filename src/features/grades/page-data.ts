@@ -1,34 +1,23 @@
 import { classQueries } from '@/features/classes/queries'
-import { subjectQueries } from '@/features/subjects/queries'
 import { studentQueries } from '@/features/students/queries'
 import { gradeQueries } from './queries'
 
-export async function getGradePageData(params: {
-  classId?: string
-  subjectId?: string
-  semester?: string
-}) {
+export async function getGradePageData(params: { classId?: string; semester?: string }) {
   const semester = params.semester ?? 'Ganjil 2025/2026'
   const classesPromise = classQueries.findOptions()
-  const subjectsPromise = subjectQueries.findOptions()
-  // Explicit filters already identify the data; only defaults need the options.
   const classIdPromise = params.classId === undefined
     ? classesPromise.then(classes => classes[0]?.id ?? '')
     : Promise.resolve(params.classId)
-  const subjectIdPromise = params.subjectId === undefined
-    ? subjectsPromise.then(subjects => subjects[0]?.id ?? '')
-    : Promise.resolve(params.subjectId)
-  const selectionPromise = Promise.all([classIdPromise, subjectIdPromise])
-  const [classes, subjects, [classId, subjectId], students, grades] = await Promise.all([
+  const [classes, classId, roster, grades] = await Promise.all([
     classesPromise,
-    subjectsPromise,
-    selectionPromise,
-    selectionPromise.then(([classId, subjectId]) => classId && subjectId
-      ? studentQueries.findAcademicRoster(classId) : []),
-    selectionPromise.then(([classId, subjectId]) => classId && subjectId
-      ? gradeQueries.findByClassSubjectSemester(classId, subjectId, semester) : []),
+    classIdPromise,
+    classIdPromise.then(id => id ? studentQueries.findAcademicRoster(id) : []),
+    classIdPromise.then(id => id ? gradeQueries.findByClassSemester(id, semester) : []),
   ])
-
-  return { classes, subjects, classId, subjectId, semester, students,
+  const students = Array.from(new Map([
+    ...roster.map(student => [student.id, student] as const),
+    ...grades.map(grade => [grade.student.id, grade.student] as const),
+  ]).values()).sort((a, b) => a.name.localeCompare(b.name))
+  return { classes, classId, semester, students,
     gradeMap: Object.fromEntries(grades.map(item => [item.studentId, item])) }
 }

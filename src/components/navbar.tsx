@@ -14,7 +14,7 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { href: "/", label: "Beranda" },
-  { href: "/#visi-misi", label: "Tentang Sekolah" },
+  { href: "/tentang-sekolah", label: "Tentang Sekolah" },
   { href: "/data-siswa", label: "Data Siswa" },
   {
     label: "Program Sekolah",
@@ -63,7 +63,7 @@ export function Navbar() {
   }, [pathname]);
 
   const isTransparentOverHero = overTransparentHero && !scrolled && !isOpen;
-  const isSolidNav = scrolled && !isTransparentOverHero;
+  const isSolidNav = (pathname === "/" || scrolled) && !isTransparentOverHero;
 
   const toggleDropdown = (label: string) => {
     setOpenDropdowns((prev) => ({ ...prev, [label]: !prev[label] }));
@@ -117,11 +117,11 @@ export function Navbar() {
               let itemClass = "group relative flex items-center gap-2 px-3 xl:px-4 py-2.5 rounded-xl text-[14px] xl:text-[15px] font-semibold transition-all duration-300";
 
               if (isActive) {
-                itemClass += isSolidNav
+                itemClass += isSolidNav || pathname === "/"
                   ? " bg-primary !text-white shadow-md shadow-primary/20"
                   : " bg-white/20 !text-white shadow-sm";
               } else {
-                itemClass += isSolidNav
+                itemClass += isSolidNav || pathname === "/"
                   ? " text-text-secondary hover:bg-primary/5 hover:text-primary"
                   : " !text-white hover:bg-white/20";
               }

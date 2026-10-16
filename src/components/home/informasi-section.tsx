@@ -4,7 +4,7 @@ import { announcementService } from "@/features/announcements/services";
 import { AnnouncementList } from "./announcement-list";
 
 export async function InformasiSection() {
-  const announcements = await announcementService.getPublished(6).catch((error) => {
+  const announcements = await announcementService.getPublished(3).catch((error) => {
     console.error("Gagal memuat pengumuman dari database:", error);
     return [];
   });

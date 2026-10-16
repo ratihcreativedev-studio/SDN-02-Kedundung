@@ -53,7 +53,7 @@ export async function Footer() {
               <ul className="space-y-3 text-sm">
                 {[
                   { label: "Beranda", href: "/" },
-                  { label: "Tentang Sekolah", href: "/#visi-misi" },
+                  { label: "Tentang Sekolah", href: "/tentang-sekolah" },
                   { label: "Informasi", href: "/#informasi" },
                   { label: "Kontak", href: "/#kontak" },
                 ].map((link) => (

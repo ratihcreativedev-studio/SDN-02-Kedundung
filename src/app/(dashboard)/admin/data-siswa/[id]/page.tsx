@@ -1,3 +1,4 @@
+import { StudentGradeTable } from '@/features/grades/components/StudentGradeTable'
 import { studentService } from '@/features/students/services'
 import { gradeQueries } from '@/features/grades/queries'
 import { attendanceQueries } from '@/features/attendance/queries'
@@ -32,18 +33,6 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   const formattedDate = student.birthDate 
     ? new Date(student.birthDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
     : '-'
-
-  const subjectMap = new Map<string, { total: number; count: number; name: string }>()
-  for (const g of grades) {
-    const existing = subjectMap.get(g.subjectId) || { total: 0, count: 0, name: g.subject.name }
-    existing.total += g.score
-    existing.count += 1
-    subjectMap.set(g.subjectId, existing)
-  }
-  const averages = Array.from(subjectMap.values()).map(s => ({
-    name: s.name,
-    avg: (s.total / s.count).toFixed(2)
-  }))
 
   // Attendance is now stored as monthly summaries directly
   const monthlyAttendances = attendances.map((att) => ({
@@ -81,31 +70,6 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
             </span>
             <p className="mt-3 text-sm font-medium text-text-secondary">Status: {{ active: 'Aktif', inactive: 'Tidak Aktif', graduate: 'Lulus' }[student.status]}</p>
             {student.graduationDate && <p className="mt-1 text-xs text-text-muted">Tanggal kelulusan: {student.graduationDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}</p>}
-          </div>
-
-          {/* Average Grades Card */}
-          <div className="section-card p-6 h-fit">
-            <div className="flex items-center gap-3 mb-4 pb-3 border-b border-border">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/10 text-orange-600">
-                <BookOpen size={16} />
-              </div>
-              <h3 className="text-lg font-bold text-primary">Rata-Rata Nilai</h3>
-            </div>
-            
-            {averages.length > 0 ? (
-              <div className="space-y-3">
-                {averages.map(avg => (
-                  <div key={avg.name} className="flex justify-between items-center bg-surface-alt/50 px-4 py-3 rounded-xl border border-border transition-colors hover:border-primary/30">
-                    <span className="text-sm font-medium text-text-secondary">{avg.name}</span>
-                    <span className="text-base font-bold text-primary">{avg.avg}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-text-muted text-center py-6 bg-surface-alt/30 rounded-xl border border-dashed border-border">
-                Belum ada data nilai
-              </p>
-            )}
           </div>
 
           {/* Attendance Recap Card */}
@@ -156,6 +120,21 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
 
         {/* Details Data (Scrollable) */}
         <div className="lg:col-span-2 space-y-6">
+          <section className="section-card p-6">
+            <div className="mb-5 flex items-center gap-3 border-b border-border pb-3">
+              <BookOpen size={20} className="text-orange-600" />
+              <h3 className="text-lg font-bold text-primary">Rincian Nilai Siswa</h3>
+            </div>
+            <StudentGradeTable grades={grades.map(grade => ({
+              id: grade.id,
+              semester: grade.semester,
+              uh: grade.uh,
+              asts: grade.asts,
+              asas: grade.asas,
+              score: grade.score,
+            }))} />
+          </section>
+
           {/* Data Diri */}
           <div className="section-card p-6">
             <div className="flex items-center gap-3 mb-5 pb-3 border-b border-border">

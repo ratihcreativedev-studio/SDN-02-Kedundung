@@ -155,27 +155,13 @@ export async function getStudentByNISNAction(nisn: string) {
     const grades = await gradeQueries.findByStudent(student.id)
     const attendances = await attendanceQueries.findByStudent(student.id)
 
-    const gradeDetails = (grades as any[]).map((g: any) => ({
+    const gradeDetails = grades.map(g => ({
       id: g.id,
-      subjectName: g.subject?.name || 'Mata Pelajaran',
       semester: g.semester,
       score: g.score,
-      uh1: g.uh1,
-      uh2: g.uh2,
-      uh3: g.uh3,
-      uas: g.uas,
-    }))
-
-    const subjectMap = new Map<string, { total: number; count: number; name: string }>()
-    for (const g of grades as any[]) {
-      const existing = subjectMap.get(g.subjectId) || { total: 0, count: 0, name: g.subject.name }
-      existing.total += g.score
-      existing.count += 1
-      subjectMap.set(g.subjectId, existing)
-    }
-    const averages = Array.from(subjectMap.values()).map(s => ({
-      name: s.name,
-      avg: (s.total / s.count).toFixed(2)
+      uh: g.uh,
+      asts: g.asts,
+      asas: g.asas,
     }))
 
     const monthlyAttendances = (attendances as any[]).map((att: any) => {
@@ -202,7 +188,6 @@ export async function getStudentByNISNAction(nisn: string) {
       data: {
         ...student,
         gradeDetails,
-        averages,
         monthlyAttendances
       }
     }
