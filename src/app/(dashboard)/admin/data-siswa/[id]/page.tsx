@@ -164,9 +164,13 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                 <p className="text-xs font-medium text-text-muted mb-1">Pekerjaan Ayah</p>
                 <p className="text-sm font-semibold text-text-secondary">{student.fatherJob || '-'}</p>
               </div>
-              <div className="sm:col-span-2 bg-surface-alt/30 p-3.5 rounded-xl border border-border">
+              <div className="bg-surface-alt/30 p-3.5 rounded-xl border border-border">
                 <p className="text-xs font-medium text-text-muted mb-1">Nama Ibu</p>
                 <p className="text-sm font-semibold text-text-secondary">{student.motherName || '-'}</p>
+              </div>
+              <div className="bg-surface-alt/30 p-3.5 rounded-xl border border-border">
+                <p className="text-xs font-medium text-text-muted mb-1">Pekerjaan Ibu</p>
+                <p className="text-sm font-semibold text-text-secondary">{student.motherJob || '-'}</p>
               </div>
             </div>
           </div>

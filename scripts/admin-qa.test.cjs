@@ -55,7 +55,7 @@ for (const feature of features) {
   })
 }
 for (const [feature, entity, input] of [
-  ['students','Student',{ nisn:'0000000001', name:'QA Siswa', classId:'qa-class' }],
+  ['students','Student',{ nisn:'0000000001', name:'QA Siswa', classId:'qa-class', motherJob:'Guru Uji' }],
   ['classes','Class',{ name:'QA Kelas', homeroomId:'' }],
   ['teachers','Teacher',{ name:'QA Guru', position:'Guru', role:'TEACHER' }],
 ]) {
@@ -72,6 +72,10 @@ for (const [feature, entity, input] of [
     assert.equal((await api[`delete${entity}Action`]('qa-1')).success,true)
     assert.ok((await api[`create${entity}Action`](new FormData())).error)
     assert.equal(calls.length,3)
+    if (feature === 'students') {
+      assert.equal(calls[0][1].motherJob, 'Guru Uji')
+      assert.equal(calls[1][2].motherJob, 'Guru Uji')
+    }
   })
 }
 test('BUG: student NISN must contain ten digits, not arbitrary letters',()=>{

@@ -1,7 +1,7 @@
 import type { Student } from '@prisma/client'
 import { MapPin, User, Users } from 'lucide-react'
 
-type Biodata = Pick<Student, 'gender' | 'birthPlace' | 'birthDate' | 'nik' | 'religion' | 'address' | 'village' | 'district' | 'fatherName' | 'fatherJob' | 'motherName' | 'status' | 'graduationDate'>
+type Biodata = Pick<Student, 'gender' | 'birthPlace' | 'birthDate' | 'nik' | 'religion' | 'address' | 'village' | 'district' | 'fatherName' | 'fatherJob' | 'motherName' | 'motherJob' | 'status' | 'graduationDate'>
 
 function formatDate(value: Date | string | null) {
   return value ? new Date(value).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }) : '-'
@@ -20,7 +20,7 @@ export function StudentBiodata({ student }: { student: Biodata }) {
       ['Alamat Lengkap', student.address], ['Kelurahan / Desa', student.village], ['Kecamatan', student.district],
     ] },
     { title: 'Data Orang Tua', icon: Users, rows: [
-      ['Nama Ayah', student.fatherName], ['Pekerjaan Ayah', student.fatherJob], ['Nama Ibu', student.motherName],
+      ['Nama Ayah', student.fatherName], ['Pekerjaan Ayah', student.fatherJob], ['Nama Ibu', student.motherName], ['Pekerjaan Ibu', student.motherJob],
     ] },
   ]
   return <div className="space-y-6">

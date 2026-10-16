@@ -24,7 +24,7 @@ test('semester recaps: real database, Excel actions, and admin/public student re
   try {
     await db.$transaction(async tx => {
       const cls = await tx.class.create({ data: { id: fixtureId, name: fixtureId } })
-      const student = await tx.student.create({ data: { id: fixtureId, nisn: fixtureId, name: 'Siswa Pengujian Semester', classId: cls.id, nipd: `${fixtureId}-nim`, nik: '0000000000000000', religion: 'Agama Uji', address: 'Alamat sintetis untuk pengujian', village: 'Desa Uji', district: 'Kecamatan Uji', fatherName: 'Ayah Uji', fatherJob: 'Pekerjaan Uji', motherName: 'Ibu Uji', gender: 'L', birthPlace: 'Kota Uji', birthDate: new Date('2017-01-15T00:00:00Z'), status: 'graduate', graduationDate: new Date('2026-06-15T00:00:00Z') } })
+      const student = await tx.student.create({ data: { id: fixtureId, nisn: fixtureId, name: 'Siswa Pengujian Semester', classId: cls.id, nipd: `${fixtureId}-nim`, nik: '0000000000000000', religion: 'Agama Uji', address: 'Alamat sintetis untuk pengujian', village: 'Desa Uji', district: 'Kecamatan Uji', fatherName: 'Ayah Uji', fatherJob: 'Pekerjaan Uji', motherName: 'Ibu Uji', motherJob: 'Pekerjaan Ibu Uji', gender: 'L', birthPlace: 'Kota Uji', birthDate: new Date('2017-01-15T00:00:00Z'), status: 'graduate', graduationDate: new Date('2026-06-15T00:00:00Z') } })
       await tx.achievement.create({ data: { studentId: student.id, title: 'Prestasi Uji', eventName: 'Kegiatan Uji', level: 'Sekolah', rank: 'Juara 1' } })
       const cache = new Map()
       const mocks = {
@@ -81,10 +81,14 @@ test('semester recaps: real database, Excel actions, and admin/public student re
           renderToStaticMarkup(await publicPage({ params: Promise.resolve({ nisn: student.nisn }) })),
         ]
       }
+      await t.test('admin detail displays mother occupation', async () => {
+        const html = renderToStaticMarkup(await adminPage({ params: Promise.resolve({ id: student.id }) }))
+        assert.ok(html.includes(student.motherJob))
+      })
       await t.test('public search by NISN and NIM displays complete student details', async () => {
         for (const identifier of [student.nisn, student.nipd]) {
           const html = renderToStaticMarkup(await publicPage({ params: Promise.resolve({ nisn: identifier }) }))
-          for (const value of [student.name, student.nisn, student.nipd, student.nik, student.religion, student.address, student.village, student.district, student.fatherName, student.fatherJob, student.motherName, student.birthPlace, 'Lulus', '15 Januari 2017', '15 Juni 2026', 'Prestasi Uji', 'Kegiatan Uji', 'Juara 1']) {
+          for (const value of [student.name, student.nisn, student.nipd, student.nik, student.religion, student.address, student.village, student.district, student.fatherName, student.fatherJob, student.motherName, student.motherJob, student.birthPlace, 'Lulus', '15 Januari 2017', '15 Juni 2026', 'Prestasi Uji', 'Kegiatan Uji', 'Juara 1']) {
             assert.ok(html.includes(value), `Student search is missing field: ${value}`)
           }
         }

@@ -33,6 +33,7 @@ type StudentFormProps = {
     fatherName?: string | null
     fatherJob?: string | null
     motherName?: string | null
+    motherJob?: string | null
   } | null
 }
 
@@ -309,7 +310,7 @@ export function StudentForm({ classes, student }: StudentFormProps) {
                 />
               </div>
 
-              <div className="space-y-2 sm:col-span-2">
+              <div className="space-y-2">
                 <label htmlFor="motherName" className="block text-sm font-medium text-primary">
                   Nama Ibu
                 </label>
@@ -319,6 +320,19 @@ export function StudentForm({ classes, student }: StudentFormProps) {
                   type="text"
                   defaultValue={student?.motherName ?? ''}
                   placeholder="Nama Ibu"
+                  className="w-full h-11.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="motherJob" className="block text-sm font-medium text-primary">
+                  Pekerjaan Ibu
+                </label>
+                <input
+                  id="motherJob"
+                  name="motherJob"
+                  type="text"
+                  defaultValue={student?.motherJob ?? ''}
+                  placeholder="Contoh: Ibu Rumah Tangga"
                   className="w-full h-11.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 />
               </div>

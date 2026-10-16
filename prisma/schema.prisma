@@ -116,6 +116,7 @@ model Student {
   fatherName String?
   fatherJob  String?
   motherName String?
+  motherJob  String?
   ijazahUrl  String?
   note       String?   @db.Text
 

@@ -22,6 +22,7 @@ export const studentSchema = z.object({
   fatherName: optionalString,
   fatherJob: optionalString,
   motherName: optionalString,
+  motherJob: optionalString,
 })
 
 export type StudentInput = z.infer<typeof studentSchema>

@@ -88,3 +88,4 @@ next-env.d.ts
 !prisma/sql/20261016_attendance_recaps.sql
 
 !prisma/sql/20261016_attendance_semesters.sql
+!prisma/sql/20261017_student_mother_job.sql
