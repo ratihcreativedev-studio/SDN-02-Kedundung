@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { requireAdminEmail } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { gradeScopeSchema } from '../schemas'
-import { parseLedgerWorkbook } from './excel'
+import { parseExtracurricularWorkbook } from './extracurricular-excel'
 import { ledgerEditScopeSchema, ledgerScopeSchema, ledgerValuesSchema } from './schemas'
 import { catalogQueries } from '@/features/academic-catalog/queries'
 
@@ -18,31 +18,28 @@ export async function uploadLedgerAction(data: FormData) {
     await requireAdminEmail()
     const scope = gradeScopeSchema.safeParse(Object.fromEntries(data))
     const category = data.get('category')
-    if (category !== 'mata-pelajaran') return { error: 'Upload nilai ekstrakurikuler harus melalui menu Nilai Mata Pelajaran.' }
+    if (category !== 'ekstrakurikuler') return { error: 'Upload nilai rapor melalui menu Nilai Mata Pelajaran.' }
     const file = data.get('file')
     if (!scope.success || !(file instanceof File) || !file.size) return { error: 'File Excel, kelas, semester, dan kategori wajib diisi.' }
     if (file.size > 10 * 1024 * 1024) return { error: 'Ukuran file maksimal 10 MB.' }
     const catalog = await catalogQueries.active()
-    const parsed = parseLedgerWorkbook(Buffer.from(await file.arrayBuffer()), catalog)
+    const parsed = parseExtracurricularWorkbook(Buffer.from(await file.arrayBuffer()), catalog)
     const { classId, semester } = scope.data
-    if (parsed.semester !== semester) return { error: `Semester pada Excel adalah ${parsed.semester}. Sesuaikan pilihan semester sebelum upload.` }
     const roster = await db.student.findMany({ where: { classId }, select: { id: true, nisn: true } })
     const ids = new Map(roster.map(s => [s.nisn, s.id]))
     if (parsed.rows.some(row => !ids.has(row.nisn))) return { error: 'Ada NISN yang tidak terdaftar di kelas terpilih. Belum ada nilai yang disimpan.' }
     await db.$transaction(parsed.rows.map(row => {
       const values = {
-        subjects: { deleteMany: { code: { in: row.subjects.map(item => item.code) } }, create: row.subjects },
         extracurriculars: { deleteMany: { code: { in: row.extracurriculars.map(item => item.code) } }, create: row.extracurriculars },
       }
       const createValues = {
-        subjects: { create: row.subjects },
         extracurriculars: { create: row.extracurriculars },
       }
       const studentId = ids.get(row.nisn)!
       return db.ledgerReport.upsert({
         where: { studentId_semester: { studentId, semester } },
-        create: { studentId, classId, semester, sakit: row.sakit, izin: row.izin, alpha: row.alpha, ...createValues },
-        update: { classId, sakit: row.sakit, izin: row.izin, alpha: row.alpha, ...values },
+        create: { studentId, classId, semester, ...createValues },
+        update: { classId, ...values },
       })
     }))
     revalidatePath('/admin/nilai/mata-pelajaran')

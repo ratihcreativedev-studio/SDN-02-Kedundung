@@ -46,17 +46,18 @@ test('empty categories and semesters are hidden; school years sort chronological
   assert.ok(html.indexOf('Ganjil 2026/2027') < html.indexOf('Genap 2025/2026'))
   assert.ok(html.indexOf('Genap 2025/2026') < html.indexOf('Ganjil 2024/2025'))
   assert.ok(!html.includes('Genap 2023/2024'))
-  assert.ok(html.includes('Nilai UH, ASTS, ASAS dan Rapor'))
+  assert.ok(html.includes('Rekap Nilai'))
   assert.match(render([], [empty]), /Belum ada data nilai/)
 })
-test('ledger query uses the resolved student ID and omits empty grade records', async () => {
-  const { gradeQueries } = load('src/features/grades/queries.ts', { '@/lib/db': { db: { ledgerReport: { findMany: async args => {
-    assert.equal(args.where.studentId, 'student-1')
-    assert.equal(args.where.OR[0].subjects.some.score.not, null)
-    assert.equal(args.where.OR[1].extracurriculars.some.predicate.not, null)
-    assert.equal(args.select.subjects.where.score.not, null)
-    assert.equal(args.select.extracurriculars.where.predicate.not, null)
-    return [ledger]
-  } } } } })
-  assert.equal((await gradeQueries.findLedgerByStudent('student-1'))[0], ledger)
+test('student recap takes only report scores from subject assessments and preserves activities', async () => {
+  const { gradeQueries } = load('src/features/grades/queries.ts', { '@/lib/db': { db: {
+    ledgerReport: { findMany: async args => { assert.equal(args.where.studentId, 'student-1'); return [ledger] } },
+    studentReport: { findMany: async args => {
+      assert.equal(args.where.studentId, 'student-1')
+      return [{ id: 'g1', semester: ledger.semester, subjectCode: 'MU', subjectName: 'Matematika', score: 0, uh: 90, asts: 80, asas: 70, class: ledger.class }]
+    } },
+  } } })
+  const [recap] = await gradeQueries.findLedgerByStudent('student-1')
+  assert.deepEqual(JSON.parse(JSON.stringify(recap.subjects)), [{ code: 'MU', name: 'Matematika', score: 0 }])
+  assert.equal(recap.extracurriculars, ledger.extracurriculars)
 })

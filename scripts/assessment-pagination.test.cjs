@@ -25,7 +25,7 @@ test('pagination clamps invalid, empty and out-of-range pages', () => {
 test('all academic categories fetch only the page roster and its values while retaining full recap counts', async () => {
   for (const category of ['grades', 'attendance', 'mata-pelajaran', 'ekstrakurikuler']) {
     const recordCalls = []
-    const relation = category === 'grades' ? 'reports' : category === 'attendance' ? 'attendanceRecaps' : 'ledgerReports'
+    const relation = (category === 'grades' || category === 'mata-pelajaran') ? 'reports' : category === 'attendance' ? 'attendanceRecaps' : 'ledgerReports'
     let studentQueries = 0
     const model = {
       count: async ({ where }) => {
@@ -37,6 +37,7 @@ test('all academic categories fetch only the page roster and its values while re
     const db = {
       student: {
         count: async ({ where }) => {
+          if (where.reports) return 29
           assert.equal(where.OR[0].classId, 'class-5')
           assert.equal(where.OR[1][relation].some.classId, 'class-5')
           assert.equal(where.OR[1][relation].some.semester, 'Genap 2025/2026')
@@ -62,8 +63,8 @@ test('all academic categories fetch only the page roster and its values while re
     assert.equal(recordCalls[0].where.studentId.in.join(','), 'last-page-student')
     assert.equal(recordCalls[0].where.classId, 'class-5')
     assert.equal(recordCalls[0].where.semester, 'Genap 2025/2026')
-    if (category === 'mata-pelajaran') assert.equal(recordCalls[0].select.extracurriculars, false)
-    if (category === 'ekstrakurikuler') assert.equal(recordCalls[0].select.subjects, false)
+    if (category === 'mata-pelajaran') assert.equal(recordCalls[0].select, undefined)
+    if (category === 'ekstrakurikuler') assert.ok(recordCalls[0].select.subjects)
   }
 })
 test('no classes produces an empty first page without querying student records', async () => {
@@ -92,7 +93,7 @@ test('search scopes names and NISN within the class history and keeps deletion t
       '@/features/classes/queries': { classQueries: { findOptions: async () => [{ id: 'class-5' }] } },
       '@/lib/db': { db: {
         student: {
-          count: async ({ where }) => { seen.push(where); return 0 },
+          count: async ({ where }) => { if (where.reports) return 29; seen.push(where); return 0 },
           findMany: async ({ where, skip, take }) => {
             seen.push(where); assert.equal(skip, 0); assert.equal(take, 10); return []
           },

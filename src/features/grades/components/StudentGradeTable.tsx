@@ -1,6 +1,6 @@
 type StudentGrade = {
   id: string
-  semester: string
+  subjectName: string
   uh: number | null
   asts: number | null
   asas: number | null
@@ -18,7 +18,7 @@ export function StudentGradeTable({ grades }: { grades: StudentGrade[] }) {
         <table className="w-full text-left text-sm">
           <thead className="border-b border-border bg-surface-alt/70 text-xs font-semibold text-text-secondary">
             <tr>
-              <th scope="col" className="px-3 py-3 text-center">Semester</th>
+              <th scope="col" className="px-3 py-3 text-center">Mata Pelajaran</th>
               <th scope="col" className="px-3 py-3 text-center">UH</th>
               <th scope="col" className="px-3 py-3 text-center">ASTS</th>
               <th scope="col" className="px-3 py-3 text-center">ASAS</th>
@@ -28,7 +28,7 @@ export function StudentGradeTable({ grades }: { grades: StudentGrade[] }) {
           <tbody className="divide-y divide-border">
             {grades.map(grade => (
               <tr key={grade.id} className="hover:bg-surface-alt/40">
-                <td className="px-3 py-3 text-center text-text-secondary">{grade.semester}</td>
+                <td className="px-3 py-3 text-center">{grade.subjectName}</td>
                 <td className="px-3 py-3 text-center">{grade.uh ?? '-'}</td>
                 <td className="px-3 py-3 text-center">{grade.asts ?? '-'}</td>
                 <td className="px-3 py-3 text-center">{grade.asas ?? '-'}</td>

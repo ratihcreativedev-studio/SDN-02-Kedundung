@@ -28,13 +28,14 @@ function setup(auth = async () => 'admin@example.test') {
     'next/cache': { revalidatePath: (...args) => refreshes.push(args) },
     '@/lib/auth': { requireAdminEmail: auth },
     './queries': { gradeQueries: queries },
+    '@/features/academic-catalog/queries': { catalogQueries: { active: async () => [{ category: 'mata-pelajaran', code: 'BI_ID', name: 'Bahasa Indonesia' }, { category: 'mata-pelajaran', code: 'MU', name: 'Matematika' }] } },
     '@/features/students/queries': { studentQueries: { findAcademicRoster: async () => [{ id: 'student-1', nisn: '001', name: 'Siswa' }] } },
   })
   return { actions, calls, refreshes, queries }
 }
 function form(extra = {}) {
   const data = new FormData()
-  for (const [key, value] of Object.entries({ classId: 'class-1', semester: 'Ganjil 2027/2028', studentId: 'student-1', uh: '0', asts: '90', asas: '90', score: '82', ...extra })) data.set(key, value)
+  for (const [key, value] of Object.entries({ subjectCode: 'BI_ID', classId: 'class-1', semester: 'Ganjil 2027/2028', studentId: 'student-1', uh: '0', asts: '90', asas: '90', score: '82', ...extra })) data.set(key, value)
   return data
 }
 function workbook(nisn = '001') {
@@ -45,11 +46,11 @@ function workbook(nisn = '001') {
 test('edit updates only one student in the requested class and semester, preserving zero', async () => {
   const { actions, calls, refreshes } = setup()
   assert.equal((await actions.editGradeAction(form())).success, true)
-  assert.deepEqual(JSON.parse(JSON.stringify(calls)), [['edit', 'class-1', 'Ganjil 2027/2028', 'student-1', { uh: 0, asts: 90, asas: 90, score: 82 }]])
-  assert.equal(refreshes.length, 4)
+  assert.deepEqual(JSON.parse(JSON.stringify(calls)), [['edit', 'class-1', 'Ganjil 2027/2028', 'student-1', 'BI_ID', { uh: 0, asts: 90, asas: 90, score: 82 }]])
+  assert.equal(refreshes.length, 5)
 })
 test('invalid scores and periods never write data', async () => {
-  for (const extra of [{ uh: '' }, { uh: '101' }, { asas: '-1' }, { score: 'NaN' }, { semester: '' }, { semester: 'Ganjil 2027/2029' }, { classId: '' }]) {
+  for (const extra of [{ score: '' }, { uh: '101' }, { asas: '-1' }, { score: 'NaN' }, { semester: '' }, { semester: 'Ganjil 2027/2029' }, { classId: '' }, { subjectCode: '' }]) {
     const { actions, calls } = setup()
     assert.ok((await actions.editGradeAction(form(extra))).error)
     assert.equal(calls.length, 0)
@@ -66,7 +67,7 @@ test('delete requires exact valid class and semester', async () => {
   assert.ok((await actions.deleteGradeRecapAction(form({ semester: '' }))).error)
   assert.equal(calls.length, 0)
   assert.equal((await actions.deleteGradeRecapAction(form())).success, true)
-  assert.deepEqual(calls, [['delete', 'class-1', 'Ganjil 2027/2028']])
+  assert.deepEqual(calls, [['delete', 'class-1', 'Ganjil 2027/2028', 'BI_ID']])
 })
 test('all mutation actions require admin authorization', async () => {
   const { actions, calls } = setup(async () => { throw Error('Unauthorized') })
@@ -80,7 +81,7 @@ test('Excel update targets the selected year and class; wrong-class NISN rejects
     const result = await actions.uploadGradesAction(data)
     if (nisn === '002') { assert.ok(result.error); assert.equal(calls.length, 0); continue }
     assert.equal(result.success, true)
-    assert.deepEqual(JSON.parse(JSON.stringify(calls)), [['upload', [{ classId: 'class-1', studentId: 'student-1', semester: 'Ganjil 2027/2028', uh: 70, asts: 90, asas: 90, score: 82 }]]])
+    assert.deepEqual(JSON.parse(JSON.stringify(calls)), [['upload', [{ subjectCode: 'BI_ID', subjectName: 'Bahasa Indonesia', classId: 'class-1', studentId: 'student-1', semester: 'Ganjil 2027/2028', uh: 70, asts: 90, asas: 90, score: 82 }]]])
   }
 })
 test('database edit and delete use the stored class rather than the current student class', async () => {
@@ -90,10 +91,17 @@ test('database edit and delete use the stored class rather than the current stud
     deleteMany: async args => { calls.push(args); return { count: 1 } },
   } }
   const { gradeQueries } = load('src/features/grades/queries.ts', { '@/lib/db': { db } })
-  await gradeQueries.updateOne('class-1', 'Ganjil 2027/2028', 'student-1', { uh: 70, asts: 80, asas: 90, score: 82 })
-  await gradeQueries.deleteByClassSemester('class-1', 'Ganjil 2027/2028')
+  await gradeQueries.updateOne('class-1', 'Ganjil 2027/2028', 'student-1', 'BI_ID', { uh: 70, asts: 80, asas: 90, score: 82 })
+  await gradeQueries.deleteByClassSemester('class-1', 'Ganjil 2027/2028', 'BI_ID')
   assert.deepEqual(JSON.parse(JSON.stringify(calls)), [
-    { where: { classId: 'class-1', semester: 'Ganjil 2027/2028', studentId: 'student-1' }, data: { uh: 70, asts: 80, asas: 90, score: 82 } },
-    { where: { classId: 'class-1', semester: 'Ganjil 2027/2028' } },
+    { where: { subjectCode: 'BI_ID', classId: 'class-1', semester: 'Ganjil 2027/2028', studentId: 'student-1' }, data: { uh: 70, asts: 80, asas: 90, score: 82 } },
+    { where: { subjectCode: 'BI_ID', classId: 'class-1', semester: 'Ganjil 2027/2028' } },
   ])
+})
+
+
+test('admin can fill assessment components gradually without converting blanks to zero', async () => {
+  const { actions, calls } = setup()
+  assert.equal((await actions.editGradeAction(form({ uh: '', asts: '0', asas: ' ' }))).success, true)
+  assert.deepEqual(JSON.parse(JSON.stringify(calls[0].at(-1))), { uh: null, asts: 0, asas: null, score: 82 })
 })

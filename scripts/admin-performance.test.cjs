@@ -51,6 +51,7 @@ test('explicit academic filters fetch records while option lists are still pendi
     const options = new Promise(resolve => { releaseOptions = resolve })
     const calls = []
     const mocks = {
+      './subjects': { getSubjectOptions: async () => [{ code: 'BI_ID', name: 'Bahasa Indonesia' }] },
       '@/features/classes/queries': { classQueries: { findOptions: () => options } },
       '@/features/students/queries': { studentQueries: { findAcademicRoster: async id => {
         calls.push(['roster', id]); return [{ id: 'qa-student', name: 'QA', nisn: '0000000001' }]
@@ -68,7 +69,7 @@ test('explicit academic filters fetch records while option lists are still pendi
     releaseOptions([{ id: 'default', name: 'Default' }])
     const data = await result
     assert.deepEqual(earlyCalls, feature === 'grades'
-      ? [['roster', 'qa-class'], ['records', 'qa-class', 'Genap 2026/2027']]
+      ? [['roster', 'qa-class'], ['records', 'qa-class', 'Genap 2026/2027', 'BI_ID']]
       : [['roster', 'qa-class'], ['records', 'qa-class', 'Ganjil 2026/2027']])
     assert.equal(data.classId, 'qa-class')
     assert.equal(data.students.length, 1)
@@ -79,6 +80,7 @@ test('academic page defaults keep the first option and skip records when options
   for (const empty of [false, true]) {
     const calls = []
     const mocks = {
+      './subjects': { getSubjectOptions: async () => [{ code: 'BI_ID', name: 'Bahasa Indonesia' }] },
       '@/features/classes/queries': { classQueries: { findOptions: async () => empty ? [] : [{ id: 'first-class' }] } },
       '@/features/students/queries': { studentQueries: { findAcademicRoster: async id => { calls.push(id); return [] } } },
       './queries': { gradeQueries: { findByClassSemester: async (...args) => { calls.push(args); return [] } } },
@@ -86,7 +88,7 @@ test('academic page defaults keep the first option and skip records when options
     const result = await load('src/features/grades/page-data.ts', null, mocks).getGradePageData({})
     assert.equal(result.classId, empty ? '' : 'first-class')
     assert.equal(result.semester, 'Ganjil 2025/2026')
-    assert.deepEqual(calls, empty ? [] : ['first-class', ['first-class', 'Ganjil 2025/2026']])
+    assert.deepEqual(calls, empty ? [] : ['first-class', ['first-class', 'Ganjil 2025/2026', 'BI_ID']])
 
     calls.length = 0
     mocks['./queries'] = { attendanceQueries: { findByClassAndSemester: async (...args) => { calls.push(args); return [] } } }
@@ -119,7 +121,7 @@ test('academic roster is class-scoped and never loads private biodata', async ()
 
 test('grades and attendance retain their filters and displayed values with minimal student identity', async () => {
   const db = { studentReport: { findMany: async args => {
-    assert.deepEqual(plain(args.where), { semester: 'Ganjil 2026/2027', classId: 'qa-class' })
+    assert.deepEqual(plain(args.where), { semester: 'Ganjil 2026/2027', classId: 'qa-class', subjectCode: 'BI_ID' })
     assert.deepEqual(plain(args.select), { studentId: true, score: true, uh: true, asts: true, asas: true, student: { select: { id: true, nisn: true, name: true } } })
     assert.equal(args.include, undefined)
     return [{ studentId: 'qa-1', score: 0, uh: 0, asts: null, asas: 90 }]
@@ -142,6 +144,7 @@ test('production module reloads reuse one bounded database pool', () => {
   const pools = []
   const shared = {}
   const mocks = {
+      './subjects': { getSubjectOptions: async () => [{ code: 'BI_ID', name: 'Bahasa Indonesia' }] },
     pg: { Pool: class { constructor(options) { pools.push(options) } } },
     '@prisma/adapter-pg': { PrismaPg: class {} },
     '@prisma/client': { PrismaClient: class {} },
@@ -171,7 +174,7 @@ test('report uploads use one parameterized statement keyed by student and semest
   const semester = "Ganjil 'test'"
   const db = { $executeRaw: async sql => {
     calls++
-    assert.match(sql.sql, /ON CONFLICT \("studentId", "semester"\) DO UPDATE/)
+    assert.match(sql.sql, /ON CONFLICT \("studentId", "subjectCode", "semester"\) DO UPDATE/)
     assert.ok(!sql.sql.includes(semester))
     assert.ok(!sql.sql.includes('subjectId'))
     assert.ok(sql.values.includes(semester))
@@ -182,8 +185,8 @@ test('report uploads use one parameterized statement keyed by student and semest
   assert.equal(await q.upsertMany([]), 0)
   assert.equal(calls, 0)
   assert.equal(await q.upsertMany([
-    { classId: 'class-1', studentId: 'student-1', semester, uh: 0, asts: 90, asas: 90, score: 82 },
-    { classId: 'class-1', studentId: 'student-2', semester, uh: 70, asts: 80, asas: 90, score: 81 },
+    { subjectCode: 'BI_ID', subjectName: 'Bahasa Indonesia', classId: 'class-1', studentId: 'student-1', semester, uh: 0, asts: 90, asas: 90, score: 82 },
+    { subjectCode: 'BI_ID', subjectName: 'Bahasa Indonesia', classId: 'class-1', studentId: 'student-2', semester, uh: 70, asts: 80, asas: 90, score: 81 },
   ]), 2)
   assert.equal(calls, 1)
 })

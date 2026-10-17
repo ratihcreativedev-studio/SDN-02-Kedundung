@@ -1,7 +1,7 @@
 import { StudentGradeTable } from './StudentGradeTable'
 import { ledgerSubjects, ledgerActivities } from '../ledger/format'
 
-type Report = { id: string; semester: string; uh: number | null; asts: number | null; asas: number | null; score: number }
+type Report = { subjectName: string; id: string; semester: string; uh: number | null; asts: number | null; asas: number | null; score: number }
 type Ledger = {
   id: string
   semester: string
@@ -32,11 +32,11 @@ export function StudentAllGrades({ grades, ledgers }: { grades: Report[]; ledger
           {ledger?.class && <p className="mt-1 text-xs text-text-secondary">{ledger.class.name}</p>}
         </div>
         {reports.length > 0 && <div className="space-y-2">
-          <h5 className="text-sm font-semibold text-primary">Nilai UH, ASTS, ASAS dan Rapor</h5>
+          <h5 className="text-sm font-semibold text-primary">Rekap Nilai</h5>
           <StudentGradeTable grades={reports} />
         </div>}
-        {!!ledger?.subjects.length && <div className="space-y-2">
-          <h5 className="text-sm font-semibold text-primary">Nilai Mata Pelajaran</h5>
+        {reports.length === 0 && !!ledger?.subjects.length && <div className="space-y-2">
+          <h5 className="text-sm font-semibold text-primary">Rekap Nilai</h5>
           <div className="overflow-x-auto rounded-xl border border-border">
             <table className="w-full text-left text-sm">
               <thead className="bg-surface-alt/70 text-text-secondary"><tr><th scope="col" className="px-4 py-3">Mata Pelajaran</th><th scope="col" className="px-4 py-3 text-center">Nilai</th></tr></thead>

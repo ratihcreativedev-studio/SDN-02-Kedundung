@@ -9,7 +9,9 @@ import { GradeRow, type GradeValues } from './GradeRow'
 
 const initialState = { error: '', success: false }
 
-export function GradeUploadClient({ classId, className, semester, students, gradeMap, totalCount }: {
+export function GradeUploadClient({ subjectCode, subjectName, classId, className, semester, students, gradeMap, totalCount }: {
+  subjectCode: string
+  subjectName: string
   totalCount?: number
   classId: string
   className: string
@@ -48,12 +50,13 @@ export function GradeUploadClient({ classId, className, semester, students, grad
   const busy = uploading || deleting
 
   const uploadForm = (
-        <ConfirmationForm action={uploadAction} confirmation={{ title: hasData ? 'Update rekap nilai?' : 'Simpan rekap nilai?', description: `Nilai dari Excel akan disimpan untuk ${className}, ${semester}. Nilai siswa yang tercantum pada file akan diperbarui; siswa yang tidak tercantum tetap tersimpan.`, confirmLabel: 'Ya, simpan rekap' }} className={`${hasData ? '' : 'section-card'} p-6 flex flex-col items-center justify-center text-center`}>
+        <ConfirmationForm action={uploadAction} confirmation={{ title: hasData ? 'Update rekap nilai?' : 'Simpan rekap nilai?', description: `Nilai dari Excel akan disimpan untuk ${subjectName}, ${className}, ${semester}. Nilai siswa yang tercantum pada file akan diperbarui; siswa yang tidak tercantum tetap tersimpan.`, confirmLabel: 'Ya, simpan rekap' }} className={`${hasData ? '' : 'section-card'} p-6 flex flex-col items-center justify-center text-center`}>
+          <input type="hidden" name="subjectCode" value={subjectCode} />
           <input type="hidden" name="classId" value={classId} />
           <input type="hidden" name="semester" value={semester} />
           <h3 id={uploadTitleId} className="text-lg font-bold text-primary mb-2">{hasData ? 'Update Rekap Nilai' : 'Upload Data Nilai'}</h3>
           <p className="text-sm text-text-secondary mb-2">Format Excel: <strong>NISN | NAMA | UH | ASTS | ASAS | NILAI RAPOR</strong></p>
-          <p className="text-xs text-text-muted mb-6">{className} · {semester}</p>
+          <p className="text-xs text-text-muted mb-6">{subjectName} · {className} · {semester}</p>
           <label
             onDragOver={event => { event.preventDefault(); if (!busy) setIsDragOver(true) }}
             onDragLeave={() => setIsDragOver(false)}
@@ -103,13 +106,14 @@ export function GradeUploadClient({ classId, className, semester, students, grad
       <section className="section-card overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border p-5">
           <div>
-            <h2 className="text-lg font-bold text-primary">Rekap Nilai {className}</h2>
+            <h2 className="text-lg font-bold text-primary">Nilai {subjectName} — {className}</h2>
             <p className="text-sm text-text-secondary">{semester} · {count} siswa sudah memiliki nilai</p>
           </div>
             <div className="flex flex-wrap gap-2">
               <button type="button" disabled={busy} onClick={() => { setShowUploadError(false); dialogRef.current?.showModal() }} className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50">Update Rekap Nilai</button>
-              <ConfirmationForm action={deleteAction} confirmation={{ title: `Hapus rekap ${className}?`, description: `Seluruh ${count} nilai siswa untuk ${className}, ${semester}, akan dihapus. Rekap kelas dan semester lainnya tetap tersimpan.`, confirmLabel: 'Ya, hapus rekap', destructive: true }}>
-                <input type="hidden" name="classId" value={classId} />
+              <ConfirmationForm action={deleteAction} confirmation={{ title: `Hapus rekap ${className}?`, description: `Seluruh ${count} nilai siswa untuk ${subjectName}, ${className}, ${semester}, akan dihapus. Nilai rapor mapel ini juga dihapus dari rekap. Nilai mapel, kelas, dan semester lainnya tetap tersimpan.`, confirmLabel: 'Ya, hapus rekap', destructive: true }}>
+                <input type="hidden" name="subjectCode" value={subjectCode} />
+          <input type="hidden" name="classId" value={classId} />
                 <input type="hidden" name="semester" value={semester} />
                 <button disabled={busy} className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600 disabled:opacity-50">{deleting ? 'Menghapus...' : 'Hapus Rekap Nilai'}</button>
               </ConfirmationForm>
@@ -121,7 +125,7 @@ export function GradeUploadClient({ classId, className, semester, students, grad
               <thead className="bg-surface-alt text-text-secondary">
                 <tr>{['NISN', 'Nama Siswa', 'UH', 'ASTS', 'ASAS', 'Nilai Rapor', 'Aksi'].map(label => <th scope="col" key={label} className="px-4 py-3 font-semibold">{label}</th>)}</tr>
               </thead>
-              <tbody>{students.length === 0 && <tr><td colSpan={7} className="px-4 py-8 text-center text-text-muted">Tidak ada siswa yang cocok dengan pencarian.</td></tr>}{students.map(student => <GradeRow key={`${student.id}-${JSON.stringify(gradeMap[student.id])}`} student={student} grade={gradeMap[student.id]} classId={classId} semester={semester} disabled={busy} />)}</tbody>
+              <tbody>{students.length === 0 && <tr><td colSpan={7} className="px-4 py-8 text-center text-text-muted">Tidak ada siswa yang cocok dengan pencarian.</td></tr>}{students.map(student => <GradeRow key={`${student.id}-${JSON.stringify(gradeMap[student.id])}`} subjectCode={subjectCode} student={student} grade={gradeMap[student.id]} classId={classId} semester={semester} disabled={busy} />)}</tbody>
             </table>
           </div>
       </section>

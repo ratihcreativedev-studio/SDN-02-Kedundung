@@ -19,16 +19,52 @@ export async function LedgerPage({ params, category }: { params: { classId?: str
       if (!columnMap.has(item.code)) columnMap.set(item.code, { code: item.code, name: item.name, label: subjects ? item.code : item.name })
     }
   }
-  const columns = Array.from(columnMap.values())
+  const columns = Array.from(columnMap.values()).map(column => ({
+    ...column,
+    label: subjects && column.code === 'BI_ID' ? 'BI'
+      : subjects && column.code === 'BI_EN' ? 'BIng'
+      : column.label,
+  }))
   const visible = reports.filter(r => subjects ? r.subjects.length : r.extracurriculars.length)
   const reportMap = new Map(visible.map(report => [report.studentId, report]))
+
+  if (subjects) return (
+    <div className="space-y-6">
+      <PageHeader title="Rekap Nilai" description="Nilai rapor setiap mata pelajaran otomatis diambil dari menu Nilai Mata Pelajaran." icon={ClipboardList} iconGradient="from-orange-500 to-orange-600" />
+      <GradeFilter search={search} key={`${classId}-${semester}-${search}`} basePath="/admin/nilai/mata-pelajaran" classes={classes} classId={classId} semester={semester}>
+        <div className="section-card overflow-hidden">
+          <p className="p-5 text-sm text-text-secondary">Untuk mengisi atau memperbarui nilai, buka <a className="font-semibold text-primary underline" href={`/admin/nilai?${new URLSearchParams({ classId, semester })}`}>Nilai Mata Pelajaran</a>.</p>
+          <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-surface-alt"><tr><th scope="col" className="p-3">NISN</th><th scope="col" className="p-3">Nama Siswa</th>{columns.map(c => <th scope="col" key={c.code} title={c.name} className="whitespace-nowrap p-3 text-center">{c.label}</th>)}</tr></thead>
+            <tbody>{students.map(student => <tr key={student.id} className="border-b border-border"><td className="p-3">{student.nisn}</td><td className="p-3">{student.name}</td>{columns.map(c => <td key={c.code} className="p-3 text-center">{reportMap.get(student.id)?.subjects.find(s => s.code === c.code)?.score ?? '-'}</td>)}</tr>)}</tbody>
+          </table>
+          </div>
+          {!students.length && <p className="p-6 text-center">Tidak ada siswa untuk pilihan ini.</p>}
+          <Pagination currentPage={pagination.page} totalPages={pagination.totalPages} />
+          <div className="space-y-3 border-t border-border p-5 text-xs text-text-secondary">
+            <h2 className="font-semibold text-primary">Keterangan Singkatan Mata Pelajaran</h2>
+            <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
+              {columns.map(column => (
+                <div key={column.code} className="flex items-baseline gap-2">
+                  <dt className="shrink-0 font-semibold text-primary">{column.label}</dt>
+                  <dd>{column.name}</dd>
+                </div>
+              ))}
+            </dl>
+            <p className="text-text-muted">Tanda “-” berarti nilai rapor belum diunggah untuk mata pelajaran ini.</p>
+          </div>
+        </div>
+      </GradeFilter>
+    </div>
+  )
 
 
   return (
     <div className="space-y-4 sm:space-y-6">
       <PageHeader
-        title={subjects ? 'Nilai Mata Pelajaran' : 'Nilai Ekstrakurikuler'}
-        description={subjects ? 'Upload leger Excel per kelas dan semester untuk mengisi nilai mata pelajaran dan ekstrakurikuler sekaligus.' : 'Nilai ekstrakurikuler otomatis terisi dari upload nilai mata pelajaran. Predikat: SB, B, C, atau K.'}
+        title={subjects ? 'Rekap Nilai' : 'Nilai Ekstrakurikuler'}
+        description={subjects ? 'Upload leger Excel per kelas dan semester untuk mengisi nilai mata pelajaran dan ekstrakurikuler sekaligus.' : 'Upload file Excel Nilai Ekstra sesuai format sekolah. Predikat: SB, B, C, atau K.'}
         icon={ClipboardList}
         iconGradient="from-orange-500 to-orange-600"
       />

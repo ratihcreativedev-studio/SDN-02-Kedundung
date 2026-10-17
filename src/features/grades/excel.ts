@@ -5,7 +5,7 @@ export const gradeExcelColumns = ['NISN', 'NAMA', 'UH', 'ASTS', 'ASAS', 'NILAI R
 const requiredScore = z.union([z.number(), z.string().trim().min(1)])
   .transform(Number).pipe(z.number().min(0).max(100))
 const rowSchema = z.object({
-  NISN: z.union([z.string(), z.number()]).transform(String).pipe(z.string().trim().min(1)),
+  NISN: z.union([z.string().trim().min(1), z.number().int().nonnegative().max(9999999999)]).transform(value => typeof value === 'number' ? String(value).padStart(10, '0') : value),
   NAMA: z.string().trim().min(1),
   UH: requiredScore,
   ASTS: requiredScore,

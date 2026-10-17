@@ -10,6 +10,8 @@ export function GradeFilter({
   classId,
   semester,
   children,
+  subjects,
+  subjectCode,
   search,
 }: {
   basePath?: '/admin/nilai' | '/daftar-nilai' | '/admin/nilai/mata-pelajaran' | '/admin/nilai/ekstrakurikuler'
@@ -17,6 +19,8 @@ export function GradeFilter({
   classId: string
   semester: string
   search?: string
+  subjects?: { code: string; name: string }[]
+  subjectCode?: string
   children?: ReactNode
 }) {
   const router = useRouter()
@@ -29,8 +33,9 @@ export function GradeFilter({
   const semesters = Array.from({ length: lastYear - firstYear + 1 }, (_, index) => firstYear + index)
     .flatMap(year => [`Ganjil ${year}/${year + 1}`, `Genap ${year}/${year + 1}`])
 
-  const applyFilters = (nextClass: string, nextSemester: string, query = search ?? '') => {
+  const applyFilters = (nextClass: string, nextSemester: string, query = search ?? '', nextSubject = subjectCode) => {
     const params = new URLSearchParams({ classId: nextClass, semester: nextSemester })
+    if (nextSubject) params.set('subjectCode', nextSubject)
     if (query) params.set('search', query)
     startTransition(() => router.push(`${basePath}?${params.toString()}`, { scroll: false }))
   }
@@ -64,6 +69,12 @@ export function GradeFilter({
         </select>
       </label>
 
+      {subjects && <label className="space-y-2 sm:flex-1 sm:min-w-40">
+        <span className="block text-sm font-semibold text-primary">Mata Pelajaran</span>
+        <select aria-label="Mata Pelajaran" value={subjectCode} disabled={isPending} onChange={e => applyFilters(cls, sem, search, e.target.value)} className="w-full h-11 rounded-xl border border-border bg-white px-4 text-sm text-primary">
+          {subjects.map(subject => <option key={subject.code} value={subject.code}>{subject.name}</option>)}
+        </select>
+      </label>}
       {search !== undefined && <AssessmentSearch key={search} search={search} pending={isPending} onSearch={value => applyFilters(cls, sem, value)} />}
     </div>
     {isPending ? (

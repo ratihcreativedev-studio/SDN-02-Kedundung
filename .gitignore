@@ -92,3 +92,7 @@ next-env.d.ts
 !prisma/sql/20261017_grade_ledger.sql
 
 !prisma/sql/20261017_academic_catalog.sql
+
+!prisma/sql/20261018_subject_reports.sql
+
+!prisma/sql/20261018_nullable_grade_components.sql

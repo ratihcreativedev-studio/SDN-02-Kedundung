@@ -9,7 +9,7 @@ function load(name, mocks = {}) {
   const api = {}
   vm.runInNewContext(ts.transpileModule(readFileSync(`src/features/grades/ledger/${name}.ts`, 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
-  }).outputText, { exports: api, Buffer, File, console: { error() {} }, require: name => name in mocks ? mocks[name] : name === '@/features/academic-catalog/queries' ? { catalogQueries: { active: async () => catalog } } : name === './format' ? load('format') : name === './excel' ? load('excel') : name === './schemas' ? load('schemas', mocks) : name === '../schemas' ? load('../schemas', mocks) : require(name) })
+  }).outputText, { exports: api, Buffer, File, console: { error() {} }, require: name => name in mocks ? mocks[name] : name === '@/features/academic-catalog/queries' ? { catalogQueries: { active: async () => catalog } } : name === './format' ? load('format') : name === './extracurricular-excel' ? load('extracurricular-excel') : name === './excel' ? load('excel') : name === './schemas' ? load('schemas', mocks) : name === '../schemas' ? load('../schemas', mocks) : require(name) })
   return api
 }
 const { parseLedgerWorkbook } = load('excel')
@@ -56,7 +56,7 @@ test('leger rejects duplicates, wrong headers and invalid school year', () => {
   rows = fixture(); rows.splice(7, 1); assert.throws(() => parse(rows), /tidak memiliki data/)
 })
 
-test('upload enforces authorization, semester and class before saving both categories from subject uploads', async () => {
+test('upload enforces authorization, semester and class before saving extracurricular uploads without replacing report scores', async () => {
   let authorized = true, roster = true, writes = []
   const action = load('actions', {
     '@/lib/auth': { requireAdminEmail: async () => { if (!authorized) throw Error('Unauthorized') } },
@@ -68,26 +68,29 @@ test('upload enforces authorization, semester and class before saving both categ
     'next/cache': { revalidatePath() {} },
   }).uploadLedgerAction
   const book = xlsx.utils.book_new()
-  xlsx.utils.book_append_sheet(book, xlsx.utils.aoa_to_sheet(fixture()), 'Worksheet')
+  xlsx.utils.book_append_sheet(book, xlsx.utils.aoa_to_sheet(fixture().map(row => [...row.slice(0, 4), ...row.slice(18)])), 'Worksheet')
   const form = new FormData()
   form.set('file', new File([xlsx.write(book, { type: 'buffer', bookType: 'xlsx' })], 'leger.xlsx'))
-  form.set('classId', 'class'); form.set('semester', 'Genap 2025/2026'); form.set('category', 'mata-pelajaran')
+  form.set('classId', 'class'); form.set('semester', 'Genap 2025/2026'); form.set('category', 'ekstrakurikuler')
   authorized = false
   assert.ok((await action(form)).error); assert.equal(writes.length, 0)
   authorized = true; roster = false
   assert.ok((await action(form)).error); assert.equal(writes.length, 0)
-  roster = true; form.set('semester', 'Ganjil 2025/2026')
+  roster = true; form.set('semester', '')
   assert.ok((await action(form)).error); assert.equal(writes.length, 0)
-  form.set('semester', 'Genap 2025/2026')
+  form.set('semester', 'Ganjil 2028/2029')
   assert.equal((await action(form)).success, true)
-  assert.equal(writes[0].update.subjects.create.length, 11)
+  assert.equal(writes[0].update.subjects, undefined)
+  assert.equal(writes[0].update.sakit, undefined)
+  assert.equal(writes[0].update.izin, undefined)
+  assert.equal(writes[0].update.alpha, undefined)
   assert.equal(writes[0].update.extracurriculars.create.length, 8)
   assert.equal(writes[0].create.extracurriculars.create.length, 8)
-  assert.equal(writes[0].create.subjects.create.length, 11)
+  assert.equal(writes[0].create.subjects, undefined)
   assert.equal(writes[0].update.extracurriculars.create.find(s => s.code === 'BTQ').predicate, 'SB')
   assert.equal(writes[0].update.extracurriculars.create[0].predicate, null)
-  assert.equal(writes[0].where.studentId_semester.semester, 'Genap 2025/2026')
-  writes = []; form.set('category', 'ekstrakurikuler')
+  assert.equal(writes[0].where.studentId_semester.semester, 'Ganjil 2028/2029')
+  writes = []; form.set('category', 'mata-pelajaran')
   assert.match((await action(form)).error, /melalui menu Nilai Mata Pelajaran/)
   assert.equal(writes.length, 0)
 })
@@ -175,4 +178,54 @@ test('catalog-based imports accept new subjects and activities, preserve BI alia
   assert.equal(result.rows[0].extracurriculars.find(i => i.code === 'ROBOTIK').predicate, 'SB')
   assert.equal(result.rows[0].sakit, 0)
   assert.throws(() => parseLedgerWorkbook(buffer, catalog), /tidak dikenal/)
+})
+
+test('standalone extracurricular format reads merged headers, numeric NISN, blanks and predicates', () => {
+  const rows = fixture().map(row => [...row.slice(0, 4), ...row.slice(18)])
+  rows[7][2] = 12345678
+  rows[7][5] = ' sb '
+  const book = xlsx.utils.book_new()
+  xlsx.utils.book_append_sheet(book, xlsx.utils.aoa_to_sheet(rows), 'Worksheet')
+  const result = load('extracurricular-excel').parseExtracurricularWorkbook(xlsx.write(book, { type: 'buffer', bookType: 'xlsx' }), catalog)
+  assert.equal(result.semester, undefined)
+  assert.equal(result.rows.length, 1)
+  assert.equal(result.rows[0].nisn, '0012345678')
+  assert.equal(result.rows[0].extracurriculars.length, 8)
+  assert.equal(result.rows[0].extracurriculars[0].predicate, null)
+  assert.equal(result.rows[0].extracurriculars[1].predicate, 'SB')
+  assert.equal(result.rows[0].subjects, undefined)
+  assert.equal(result.rows[0].sakit, undefined)
+})
+
+test('standalone extracurricular format rejects invalid identities, columns and predicates', () => {
+  const parse = rows => {
+    const book = xlsx.utils.book_new()
+    xlsx.utils.book_append_sheet(book, xlsx.utils.aoa_to_sheet(rows), 'Worksheet')
+    return load('extracurricular-excel').parseExtracurricularWorkbook(xlsx.write(book, { type: 'buffer', bookType: 'xlsx' }), catalog)
+  }
+  for (const [r, c, value] of [[7, 2, ''], [7, 2, '12345678901'], [7, 1, ''], [7, 4, 'A'], [4, 4, 'Tidak dikenal'], [4, 5, 'Melukis'], [3, 4, 'Mata Pelajaran'], [7, 12, 'B']]) {
+    const rows = fixture().map(row => [...row.slice(0, 4), ...row.slice(18)])
+    rows[r][c] = value
+    assert.throws(() => parse(rows))
+  }
+  let rows = fixture().map(row => [...row.slice(0, 4), ...row.slice(18)])
+  rows.splice(8, 0, rows[7])
+  assert.throws(() => parse(rows), /NISN berulang/)
+  rows = fixture().map(row => [...row.slice(0, 4), ...row.slice(18)])
+  rows.splice(7, 1)
+  assert.throws(() => parse(rows), /tidak memiliki data/)
+})
+
+
+test('extracurricular import ignores absent, malformed and differing year titles', () => {
+  for (const title of ['', 'NILAI EKSTRA KELAS 5', '2025/2027 GENAP', '1999/2000 GANJIL']) {
+    const rows = fixture().map(row => [...row.slice(0, 4), ...row.slice(18)])
+    rows[0][0] = title
+    const book = xlsx.utils.book_new()
+    xlsx.utils.book_append_sheet(book, xlsx.utils.aoa_to_sheet(rows), 'Worksheet')
+    const result = load('extracurricular-excel').parseExtracurricularWorkbook(xlsx.write(book, { type: 'buffer', bookType: 'xlsx' }), catalog)
+    assert.equal(result.rows.length, 1)
+    assert.equal(result.rows[0].extracurriculars.find(item => item.code === 'BTQ').predicate, 'SB')
+    assert.equal(result.semester, undefined)
+  }
 })

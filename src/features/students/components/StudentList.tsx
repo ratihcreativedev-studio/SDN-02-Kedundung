@@ -3,6 +3,7 @@ import { StudentActions } from './StudentActions'
 import { StudentFilters } from './StudentFilters'
 import { Pagination } from '@/components/Pagination'
 import type { StudentStatus } from '@prisma/client'
+import { FileCheck2, FileUp } from 'lucide-react'
 
 const statusLabels: Record<StudentStatus, string> = {
   active: 'Aktif',
@@ -20,6 +21,15 @@ function StatusBadge({ status }: { status: StudentStatus }) {
   return <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-medium ${statusStyles[status]}`}>
     <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
     {statusLabels[status]}
+  </span>
+}
+
+function IjazahBadge({ url }: { url: string | null }) {
+  const uploaded = !!url?.trim()
+  const Icon = uploaded ? FileCheck2 : FileUp
+  return <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-medium ${uploaded ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-slate-50 text-slate-600'}`}>
+    <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+    {uploaded ? 'Sudah diunggah' : 'Belum diunggah'}
   </span>
 }
 
@@ -69,10 +79,14 @@ export async function StudentList({
                     <dt className="text-text-secondary">Status Siswa</dt>
                     <dd className="text-text-secondary"><StatusBadge status={student.status} /></dd>
                   </div>
+                  <div className="flex flex-wrap justify-between gap-x-3 gap-y-1">
+                    <dt className="text-text-secondary">Ijazah</dt>
+                    <dd><IjazahBadge url={student.ijazahUrl} /></dd>
+                  </div>
                 </dl>
                 <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
                   <span className="text-xs text-text-muted">Kelola siswa</span>
-                  <StudentActions id={student.id} name={student.name} />
+                  <StudentActions id={student.id} name={student.name} note={student.note} />
                 </div>
               </li>
             ))}
@@ -90,13 +104,14 @@ export async function StudentList({
                 <th scope="col" className="py-4 px-6 font-semibold">Nama Siswa</th>
                 <th scope="col" className="py-4 px-6 font-semibold">Kelas</th>
                 <th scope="col" className="py-4 px-6 font-semibold">Status Siswa</th>
+                <th scope="col" className="py-4 px-6 font-semibold">Ijazah</th>
                 <th scope="col" className="py-4 px-6 text-right font-semibold">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {students.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-text-muted">
+                  <td colSpan={6} className="py-8 text-center text-text-muted">
                     {searchParams?.q ? 'Tidak ada siswa yang sesuai dengan pencarian' : 'Belum ada data siswa'}
                   </td>
                 </tr>
@@ -113,8 +128,11 @@ export async function StudentList({
                     <td className="py-4 px-6 text-text-secondary">
                       <StatusBadge status={student.status} />
                     </td>
+                    <td className="py-4 px-6">
+                      <IjazahBadge url={student.ijazahUrl} />
+                    </td>
                     <td className="py-4 px-6 text-right">
-                      <StudentActions id={student.id} name={student.name} />
+                      <StudentActions id={student.id} name={student.name} note={student.note} />
                     </td>
                   </tr>
                 ))

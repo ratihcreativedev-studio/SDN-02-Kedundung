@@ -236,15 +236,17 @@ model AdminWhitelist {
   @@map("admin_whitelist")
 }
 
-// One Excel report per student and semester; legacy subject grades remain archived.
+// Assessment components per student, subject and semester.
 model StudentReport {
   id        String   @id @default(cuid())
   classId   String?
   studentId String
+  subjectCode String @default("BI_ID")
+  subjectName String @default("Bahasa Indonesia")
   semester  String
-  uh        Float
-  asts      Float
-  asas      Float
+  uh        Float?
+  asts      Float?
+  asas      Float?
   score     Float
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -252,7 +254,7 @@ model StudentReport {
   class   Class?  @relation(fields: [classId], references: [id], onDelete: SetNull)
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
-  @@unique([studentId, semester])
+  @@unique([studentId, subjectCode, semester])
   @@index([classId, semester])
   @@map("student_reports")
 }

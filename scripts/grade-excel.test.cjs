@@ -39,3 +39,11 @@ test('rejects duplicates and empty sheets; ignores blank rows', () => {
   assert.throws(() => parse([[...headers, 'UH'], [...student, 20]]), /kolom wajib yang berulang/)
   assert.equal(parse([headers, [], student]).length, 1)
 })
+
+
+test('numeric NISN restores leading zeros and detects duplicates against text NISN', () => {
+  const numeric = [12345678, ...student.slice(1)]
+  assert.equal(parse([headers, numeric])[0].nisn, '0012345678')
+  assert.throws(() => parse([headers, numeric, student]), /NISN berulang/)
+  for (const nisn of [-1, 1.5, 12345678901]) assert.throws(() => parse([headers, [nisn, ...student.slice(1)]]), /Baris 2/)
+})

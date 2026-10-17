@@ -2,9 +2,9 @@ type NilaiRow = {
   id: string
   nisn: string
   name: string
-  uh?: number
-  asts?: number
-  asas?: number
+  uh?: number | null
+  asts?: number | null
+  asas?: number | null
   score?: number
 }
 

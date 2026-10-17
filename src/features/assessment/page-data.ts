@@ -4,14 +4,16 @@ import { classQueries } from '@/features/classes/queries'
 import { paginationWindow } from '@/lib/pagination'
 
 type Category = 'grades' | 'attendance' | 'mata-pelajaran' | 'ekstrakurikuler'
-export async function getAssessmentPageData(params: { classId?: string; semester?: string; page?: string; search?: string }, category: Category) {
-  const semester = params.semester ?? (category === 'grades' || category === 'attendance' ? 'Ganjil 2025/2026' : 'Genap 2025/2026')
+export async function getAssessmentPageData(params: { classId?: string; semester?: string; page?: string; search?: string; subjectCode?: string }, category: Category) {
+  const semester = params.semester ?? (category === 'grades' || category === 'attendance' || category === 'mata-pelajaran' ? 'Ganjil 2025/2026' : 'Genap 2025/2026')
   const classes = await classQueries.findOptions()
   const classId = params.classId ?? classes[0]?.id ?? ''
   const search = params.search?.trim() ?? ''
   const scope = { classId, semester }
+  const gradeScope = { ...scope, subjectCode: params.subjectCode ?? 'BI_ID' }
   const ledgerScope = { ...scope, ...(category === 'mata-pelajaran' ? { subjects: { some: {} } } : { extracurriculars: { some: {} } }) }
-  const history: Prisma.StudentWhereInput = category === 'grades' ? { reports: { some: scope } }
+  const history: Prisma.StudentWhereInput = category === 'grades' ? { reports: { some: gradeScope } }
+    : category === 'mata-pelajaran' ? { reports: { some: scope } }
     : category === 'attendance' ? { attendanceRecaps: { some: scope } }
     : { ledgerReports: { some: ledgerScope } }
   // Include current students and historical reports after a student changes class.
@@ -22,8 +24,9 @@ export async function getAssessmentPageData(params: { classId?: string; semester
   ] }]
   const [total, recordCount] = classId ? await Promise.all([
     db.student.count({ where }),
-    category === 'grades' ? db.studentReport.count({ where: scope })
+    category === 'grades' ? db.studentReport.count({ where: gradeScope })
       : category === 'attendance' ? db.attendanceRecap.count({ where: scope })
+      : category === 'mata-pelajaran' ? db.student.count({ where: { reports: { some: scope } } })
       : db.ledgerReport.count({ where: ledgerScope }),
   ]) : [0, 0]
   const pagination = paginationWindow(params.page, total)
@@ -32,14 +35,22 @@ export async function getAssessmentPageData(params: { classId?: string; semester
     orderBy: [{ name: 'asc' }, { id: 'asc' }], skip: pagination.skip, take: pagination.take,
   }) : []
   const pageScope = { ...scope, studentId: { in: students.map(student => student.id) } }
-  const [grades, attendances, ledgers] = await Promise.all([
-    category === 'grades' && students.length ? db.studentReport.findMany({ where: pageScope, select: { studentId: true, uh: true, asts: true, asas: true, score: true } }) : [],
+  const [grades, attendances, storedLedgers] = await Promise.all([
+    category === 'grades' && students.length ? db.studentReport.findMany({ where: { ...pageScope, subjectCode: gradeScope.subjectCode }, select: { studentId: true, uh: true, asts: true, asas: true, score: true } }) : [],
     category === 'attendance' && students.length ? db.attendanceRecap.findMany({ where: pageScope, select: { studentId: true, hadir: true, sakit: true, izin: true, alpha: true } }) : [],
-    (category === 'mata-pelajaran' || category === 'ekstrakurikuler') && students.length ? db.ledgerReport.findMany({ where: pageScope, select: {
+    category === 'ekstrakurikuler' && students.length ? db.ledgerReport.findMany({ where: pageScope, select: {
       studentId: true,
-      subjects: category === 'mata-pelajaran' ? { select: { code: true, name: true, score: true } } : false,
+      subjects: { select: { code: true, name: true, score: true } },
       extracurriculars: category === 'ekstrakurikuler' ? { select: { code: true, name: true, predicate: true } } : false,
     } }) : [],
   ])
+  const ledgers: { studentId: string; subjects: { code: string; name: string; score: number | null }[]; extracurriculars: { code: string; name: string; predicate: string | null }[] }[] = storedLedgers
+  if (category === 'mata-pelajaran' && students.length) {
+    const reports = await db.studentReport.findMany({ where: pageScope })
+    for (const student of students) {
+      const subjects = reports.filter(r => r.studentId === student.id).map(r => ({ code: r.subjectCode, name: r.subjectName, score: r.score }))
+      if (subjects.length) ledgers.push({ studentId: student.id, subjects, extracurriculars: [] })
+    }
+  }
   return { classes, classId, semester, students, grades, attendances, ledgers, recordCount, pagination, search }
 }

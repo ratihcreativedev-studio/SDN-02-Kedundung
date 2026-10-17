@@ -1,8 +1,7 @@
 'use client'
 
 import { createContext, useContext, useActionState, useId, useRef, useState, type ReactNode } from 'react'
-import Link from 'next/link'
-import { UploadCloud, FileSpreadsheet, Info, X } from 'lucide-react'
+import { UploadCloud, FileSpreadsheet, X } from 'lucide-react'
 import { useNotifiedAction } from '@/components/ui/notification-provider'
 import { ConfirmationForm } from '@/components/ui/confirmation-dialog'
 import { uploadLedgerAction, deleteLedgerRecapAction } from './actions'
@@ -22,7 +21,6 @@ export function LedgerUpload({ classId, className, semester, category, count, ch
   children: ReactNode
 }) {
   const subjects = category === 'mata-pelajaran'
-  const uploadHref = `/admin/nilai/mata-pelajaran?${new URLSearchParams({ classId, semester }).toString()}`
   const runAction = useNotifiedAction()
   const dialogRef = useRef<HTMLDialogElement>(null)
   const uploadTitleId = useId()
@@ -32,7 +30,7 @@ export function LedgerUpload({ classId, className, semester, category, count, ch
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploadState, uploadAction, uploading] = useActionState(async (_previous: typeof initialState, data: FormData) => {
     if (selectedFile) data.set('file', selectedFile)
-    const result = await runAction(() => uploadLedgerAction(data), 'Nilai mata pelajaran dan ekstrakurikuler berhasil diperbarui.')
+    const result = await runAction(() => uploadLedgerAction(data), 'Nilai ekstrakurikuler berhasil diperbarui.')
     if (result?.error) {
       setShowUploadError(true)
       return { error: result.error, success: false }
@@ -50,13 +48,13 @@ export function LedgerUpload({ classId, className, semester, category, count, ch
   const busy = uploading || deleting
 
   const uploadForm = (
-        <ConfirmationForm action={uploadAction} confirmation={{ title: hasData ? 'Update rekap nilai?' : 'Simpan rekap nilai?', description: `Nilai mata pelajaran dan ekstrakurikuler dari Excel akan disimpan untuk ${className}, ${semester}. Nilai siswa yang tercantum pada file akan diperbarui; siswa yang tidak tercantum tetap tersimpan. Sel kosong akan mengosongkan nilai sebelumnya.`, confirmLabel: 'Ya, simpan rekap' }} className={`${hasData ? '' : 'section-card'} p-6 flex flex-col items-center justify-center text-center`}>
+        <ConfirmationForm action={uploadAction} confirmation={{ title: hasData ? 'Update rekap nilai?' : 'Simpan rekap nilai?', description: `Nilai ekstrakurikuler dari Excel akan disimpan untuk ${className}, ${semester}. Nilai siswa yang tercantum pada file akan diperbarui; siswa yang tidak tercantum tetap tersimpan. Sel kosong akan mengosongkan nilai sebelumnya.`, confirmLabel: 'Ya, simpan rekap' }} className={`${hasData ? '' : 'section-card'} p-6 flex flex-col items-center justify-center text-center`}>
           <input type="hidden" name="classId" value={classId} />
           <input type="hidden" name="semester" value={semester} />
           <input type="hidden" name="category" value={category} />
           <h3 id={uploadTitleId} className="text-lg font-bold text-primary mb-2">{hasData ? 'Update Rekap Nilai' : 'Upload Data Nilai'}</h3>
-          <p className="text-sm text-text-secondary mb-2">Format Excel: <strong>NAMA SISWA | NISN | NIS | MATA PELAJARAN | KETIDAKHADIRAN | EKSTRA KURIKULER</strong></p>
-          <p className="text-sm text-text-secondary mb-2">Satu file leger sekaligus mengisi nilai mata pelajaran dan ekstrakurikuler. Gunakan kode atau nama yang terdaftar untuk kolom tambahan di kelompok yang sesuai.</p>
+          <p className="text-sm text-text-secondary mb-2">Format Excel: <strong>NO | NAMA SISWA | NISN | NIS | EKSTRA KURIKULER</strong></p>
+          <p className="text-sm text-text-secondary mb-2">Gunakan format file Nilai Ekstra: nama kegiatan berada di bawah kelompok Ekstra Kurikuler. Isi predikat SB, B, C, K, atau kosong. Nilai disimpan sesuai kelas dan semester yang dipilih di atas.</p>
           <p className="text-xs text-text-muted mb-6">{className} · {semester}</p>
           <label
             onDragOver={event => { event.preventDefault(); if (!busy) setIsDragOver(true) }}
@@ -80,7 +78,7 @@ export function LedgerUpload({ classId, className, semester, category, count, ch
 
   return (
     <div className="space-y-6 animate-fade-in-up animate-delay-200">
-      {subjects ? (hasData ? (
+      {(hasData ? (
         <dialog
           ref={dialogRef}
           aria-labelledby={uploadTitleId}
@@ -100,16 +98,7 @@ export function LedgerUpload({ classId, className, semester, category, count, ch
           </div>
           {uploadForm}
         </dialog>
-      ) : uploadForm) : !hasData && (
-        <div className="section-card space-y-3 p-6">
-          <h3 className="text-lg font-bold text-primary">Upload melalui Nilai Mata Pelajaran</h3>
-          <p className="text-sm text-text-secondary">Nilai ekstrakurikuler diisi bersama nilai mata pelajaran dari satu file leger Excel. Untuk menambah atau memperbarui data melalui Excel, gunakan menu Nilai Mata Pelajaran.</p>
-          <p className="text-xs text-text-muted">{className} · {semester}</p>
-          <Link href={uploadHref} className="inline-flex min-h-11 items-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white">Buka Nilai Mata Pelajaran</Link>
-        </div>
-      )}
-
-
+      ) : uploadForm)}
       {hasData && (
       <section className="section-card overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border p-5">
@@ -118,7 +107,7 @@ export function LedgerUpload({ classId, className, semester, category, count, ch
             <p className="text-sm text-text-secondary">{semester} · {count} siswa sudah memiliki nilai</p>
           </div>
             <div className="flex flex-wrap gap-2">
-              {subjects && <button type="button" disabled={busy} onClick={() => { setShowUploadError(false); dialogRef.current?.showModal() }} className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50">Update Rekap Nilai</button>}
+              <button type="button" disabled={busy} onClick={() => { setShowUploadError(false); dialogRef.current?.showModal() }} className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50">Update Rekap Nilai</button>
               <ConfirmationForm action={deleteAction} confirmation={{ title: `Hapus rekap ${className}?`, description: `Seluruh nilai ${subjects ? 'mata pelajaran' : 'ekstrakurikuler'} untuk ${className}, ${semester}, akan dihapus. Kategori lain, ketidakhadiran, kelas dan semester lainnya tetap tersimpan.`, confirmLabel: 'Ya, hapus rekap', destructive: true }}>
                 <input type="hidden" name="classId" value={classId} />
                 <input type="hidden" name="semester" value={semester} />
@@ -127,14 +116,6 @@ export function LedgerUpload({ classId, className, semester, category, count, ch
               </ConfirmationForm>
             </div>
         </div>
-        {!subjects && (
-          <div className="flex items-start gap-2 border-b border-border bg-primary/5 px-5 py-3 text-sm text-text-secondary">
-            <Info aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-            <p>Untuk memperbarui seluruh nilai melalui Excel, gunakan menu{' '}
-              <Link href={uploadHref} className="font-semibold text-primary underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-primary">Nilai Mata Pelajaran</Link>.
-            </p>
-          </div>
-        )}
         {deleteState.error && <p role="alert" className="p-4 text-sm text-red-600">{deleteState.error}</p>}
         <LedgerBusyContext.Provider value={busy}>{children}</LedgerBusyContext.Provider>
       </section>

@@ -8,7 +8,7 @@ const ts = require('typescript')
 const xlsx = require('xlsx')
 const React = require('react')
 const { renderToStaticMarkup } = require('react-dom/server')
-const { randomUUID } = require('node:crypto')
+const { randomUUID, randomInt } = require('node:crypto')
 
 // Opt in explicitly: RUN_DATABASE_TESTS=1 node --test scripts/semester-recaps.integration.test.cjs
 // All fixture writes, uploads, edits and deletions execute in one transaction that is ALWAYS rolled back.
@@ -24,11 +24,11 @@ test('semester recaps: real database, Excel actions, and admin/public student re
   try {
     await db.$transaction(async tx => {
       const cls = await tx.class.create({ data: { id: fixtureId, name: fixtureId } })
-      const student = await tx.student.create({ data: { id: fixtureId, nisn: fixtureId, name: 'Siswa Pengujian Semester', classId: cls.id, nipd: `${fixtureId}-nim`, nik: '0000000000000000', religion: 'Agama Uji', address: 'Alamat sintetis untuk pengujian', village: 'Desa Uji', district: 'Kecamatan Uji', fatherName: 'Ayah Uji', fatherJob: 'Pekerjaan Uji', motherName: 'Ibu Uji', motherJob: 'Pekerjaan Ibu Uji', gender: 'L', birthPlace: 'Kota Uji', birthDate: new Date('2017-01-15T00:00:00Z'), status: 'graduate', graduationDate: new Date('2026-06-15T00:00:00Z') } })
+      const student = await tx.student.create({ data: { id: fixtureId, nisn: String(randomInt(1000000000, 10000000000)), name: 'Siswa Pengujian Semester', classId: cls.id, nipd: `${fixtureId}-nim`, nik: '0000000000000000', religion: 'Agama Uji', address: 'Alamat sintetis untuk pengujian', village: 'Desa Uji', district: 'Kecamatan Uji', fatherName: 'Ayah Uji', fatherJob: 'Pekerjaan Uji', motherName: 'Ibu Uji', motherJob: 'Pekerjaan Ibu Uji', gender: 'L', birthPlace: 'Kota Uji', birthDate: new Date('2017-01-15T00:00:00Z'), status: 'graduate', graduationDate: new Date('2026-06-15T00:00:00Z') } })
       await tx.achievement.create({ data: { studentId: student.id, title: 'Prestasi Uji', eventName: 'Kegiatan Uji', level: 'Sekolah', rank: 'Juara 1' } })
       const cache = new Map()
       const mocks = {
-        '@/lib/db': { db: tx },
+        '@/lib/db': { db: new Proxy(tx, { get(target, property) { return property === '$transaction' ? operations => Promise.all(operations) : Reflect.get(target, property) } }) },
         '@/lib/auth': { requireAdminEmail: async () => 'test@example.invalid' },
         'next/cache': { revalidatePath() {} },
         'next/navigation': { notFound() { throw Error('Unexpected student not found') } },
@@ -41,7 +41,7 @@ test('semester recaps: real database, Excel actions, and admin/public student re
         if (cache.has(file)) return cache.get(file)
         const api = {}; cache.set(file, api)
         const output = ts.transpileModule(readFileSync(file, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX } }).outputText
-        vm.runInNewContext(output, { exports: api, Buffer, console, require: name => {
+        vm.runInNewContext(output, { exports: api, Buffer, File, console, require: name => {
           if (name in mocks) return mocks[name]
           if (name.startsWith('@/') || name.startsWith('.')) {
             const base = name.startsWith('@/') ? path.resolve('src', name.slice(2)) : path.resolve(path.dirname(file), name)
@@ -63,7 +63,7 @@ test('semester recaps: real database, Excel actions, and admin/public student re
       ]
       function form(period) {
         const data = new FormData()
-        data.set('classId', cls.id); data.set('studentId', student.id); data.set('semester', period)
+        data.set('subjectCode', 'BI_ID'); data.set('classId', cls.id); data.set('studentId', student.id); data.set('semester', period)
         return data
       }
       function uploadForm(feature, period, values) {
@@ -140,6 +140,68 @@ test('semester recaps: real database, Excel actions, and admin/public student re
           }
         })
       }
+      await t.test('subject uploads, edits and deletions stay isolated and recap contains report scores only', async () => {
+        const feature = features.find(f => f.name === 'nilai')
+        const before = await tx.studentReport.findFirst({ where: { studentId: student.id, subjectCode: 'BI_ID', semester: newPeriod } })
+        const math = uploadForm(feature, newPeriod, [10, 20, 30, 0])
+        math.set('subjectCode', 'MU')
+        assert.equal((await gradeActions.uploadGradesAction(math)).success, true)
+        const query = load('src/features/grades/queries.ts').gradeQueries
+        const recap = (await query.findLedgerByStudent(student.id)).find(r => r.semester === newPeriod)
+        assert.equal(recap.subjects.length, 2)
+        assert.equal(recap.subjects.find(s => s.code === 'MU').score, 0)
+        assert.equal(recap.subjects.find(s => s.code === 'BI_ID').score, before.score)
+        assert.equal(recap.subjects[0].uh, undefined)
+        const edit = form(newPeriod)
+        edit.set('subjectCode', 'MU')
+        for (const key of feature.fields) edit.set(key, '55')
+        assert.equal((await gradeActions.editGradeAction(edit)).success, true)
+        assert.equal((await query.findLedgerByStudent(student.id)).find(r => r.semester === newPeriod).subjects.find(s => s.code === 'MU').score, 55)
+        assert.equal((await gradeActions.deleteGradeRecapAction(edit)).success, true)
+        assert.equal(await tx.studentReport.count({ where: { studentId: student.id, subjectCode: 'MU' } }), 0)
+        assert.deepEqual(await tx.studentReport.findUnique({ where: { id: before.id } }), before)
+      })
+      await t.test('rapor-only records show dashes and allow partial component editing', async () => {
+        await tx.studentReport.create({ data: { classId: cls.id, studentId: student.id, semester: newPeriod, subjectCode: 'MU', subjectName: 'Matematika', score: 87 } })
+        for (const html of await renderPages()) assert.match(html, />-</)
+        const edit = form(newPeriod)
+        edit.set('subjectCode', 'MU'); edit.set('uh', '0'); edit.set('asts', ''); edit.set('asas', ''); edit.set('score', '87')
+        assert.equal((await gradeActions.editGradeAction(edit)).success, true)
+        const report = await tx.studentReport.findFirst({ where: { studentId: student.id, subjectCode: 'MU', semester: newPeriod } })
+        assert.equal(report.uh, 0); assert.equal(report.asts, null); assert.equal(report.asas, null)
+        const recap = await load('src/features/assessment/page-data.ts').getAssessmentPageData({ classId: cls.id, semester: newPeriod }, 'mata-pelajaran')
+        assert.equal(recap.ledgers.find(r => r.studentId === student.id).subjects.find(s => s.code === 'MU').score, 87)
+      })
+      await t.test('extracurricular upload uses selected semester, replaces predicates and preserves report scores', async () => {
+        const actions = load('src/features/grades/ledger/actions.ts')
+        const gradesBefore = await tx.studentReport.findMany({ where: { studentId: student.id }, orderBy: { id: 'asc' } })
+        function extraForm(predicate, invalidNisn) {
+          const data = form(newPeriod)
+          data.set('category', 'ekstrakurikuler')
+          const book = xlsx.utils.book_new()
+          const rows = [['TAHUN BEBAS'], [], [], ['NO', 'NAMA SISWA', 'NISN', 'NIS', 'Ekstra Kurikuler'], [null, null, null, null, 'BTQ', 'Pramuka'], [], [], [1, student.name, Number(student.nisn), 1, predicate, 'B']]
+          if (invalidNisn) rows.push([2, 'Tidak terdaftar', '0000000000', 2, 'B', 'B'])
+          xlsx.utils.book_append_sheet(book, xlsx.utils.aoa_to_sheet(rows), 'Nilai Ekstra')
+          data.set('file', new File([xlsx.write(book, { type: 'buffer', bookType: 'xlsx' })], 'ekstra.xlsx'))
+          return data
+        }
+        assert.ok((await actions.uploadLedgerAction(extraForm('B', true))).error)
+        assert.equal(await tx.ledgerReport.count({ where: { studentId: student.id } }), 0)
+        assert.equal((await actions.uploadLedgerAction(extraForm('SB'))).success, true)
+        assert.equal((await actions.uploadLedgerAction(extraForm(''))).success, true)
+        const stored = await tx.ledgerReport.findMany({ where: { studentId: student.id }, include: { extracurriculars: true } })
+        assert.equal(stored.length, 1); assert.equal(stored[0].semester, newPeriod)
+        assert.equal(stored[0].extracurriculars.find(e => e.code === 'BTQ').predicate, null)
+        assert.equal(stored[0].extracurriculars.find(e => e.code === 'PRAMUKA').predicate, 'B')
+        assert.deepEqual(await tx.studentReport.findMany({ where: { studentId: student.id }, orderBy: { id: 'asc' } }), gradesBefore)
+        const recap = await load('src/features/assessment/page-data.ts').getAssessmentPageData({ classId: cls.id, semester: newPeriod }, 'ekstrakurikuler')
+        assert.equal(recap.ledgers[0].extracurriculars.find(e => e.code === 'PRAMUKA').predicate, 'B')
+        for (const html of await renderPages()) assert.ok(html.includes('Pramuka'))
+        const deletion = form(newPeriod); deletion.set('category', 'ekstrakurikuler')
+        assert.equal((await actions.deleteLedgerRecapAction(deletion)).success, true)
+        assert.equal(await tx.ledgerExtracurricularGrade.count({ where: { report: { studentId: student.id } } }), 0)
+        assert.deepEqual(await tx.studentReport.findMany({ where: { studentId: student.id }, orderBy: { id: 'asc' } }), gradesBefore)
+      })
       throw rollback
     }, { timeout: 150000, maxWait: 15000 })
   } catch (error) {
@@ -150,6 +212,7 @@ test('semester recaps: real database, Excel actions, and admin/public student re
       assert.equal(await db.class.count({ where: { id: fixtureId } }), 0, 'Test class was not rolled back')
       assert.equal(await db.attendanceRecap.count({ where: { studentId: fixtureId } }), 0)
       assert.equal(await db.studentReport.count({ where: { studentId: fixtureId } }), 0)
+      assert.equal(await db.ledgerReport.count({ where: { studentId: fixtureId } }), 0)
     } finally { await db.$disconnect() }
   }
 })

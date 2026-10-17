@@ -3,12 +3,14 @@
 import { revalidatePath } from 'next/cache'
 import { requireAdminEmail } from '@/lib/auth'
 import { gradeQueries } from './queries'
+import { catalogQueries } from '@/features/academic-catalog/queries'
 import { studentQueries } from '@/features/students/queries'
 import { parseGradeWorkbook } from './excel'
-import { gradeScopeSchema, editGradeSchema } from './schemas'
+import { subjectGradeScopeSchema, editGradeSchema } from './schemas'
 
 function refreshGrades() {
   revalidatePath('/admin/nilai')
+  revalidatePath('/admin/nilai/mata-pelajaran')
   revalidatePath('/daftar-nilai')
   revalidatePath('/admin/data-siswa', 'layout')
   revalidatePath('/data-siswa', 'layout')
@@ -19,11 +21,14 @@ export async function uploadGradesAction(formData: FormData) {
     await requireAdminEmail()
     
     const file = formData.get('file') as File
-    const scope = gradeScopeSchema.safeParse({ classId: formData.get('classId'), semester: formData.get('semester') })
-    if (!file || typeof file.arrayBuffer !== 'function' || !scope.success) {
+    const scope = subjectGradeScopeSchema.safeParse({ classId: formData.get('classId'), semester: formData.get('semester'), subjectCode: formData.get('subjectCode') })
+    if (!file || typeof file.arrayBuffer !== 'function' || !file.size || !scope.success) {
       return { error: 'File, kelas, dan semester/tahun ajaran yang valid wajib diisi.' }
     }
-    const { classId, semester } = scope.data
+    if (file.size > 10 * 1024 * 1024) return { error: 'Ukuran file maksimal 10 MB.' }
+    const { classId, semester, subjectCode } = scope.data
+    const subject = (await catalogQueries.active()).find(item => item.category === 'mata-pelajaran' && item.code === subjectCode)
+    if (!subject) return { error: 'Pilih mata pelajaran yang aktif.' }
 
     const studentsInClass = await studentQueries.findAcademicRoster(classId)
     const studentMap = new Map(studentsInClass.map(s => [s.nisn, s.id]))
@@ -35,7 +40,7 @@ export async function uploadGradesAction(formData: FormData) {
       if (!studentId) {
         return { error: 'Ada NISN pada Excel yang tidak terdaftar di kelas terpilih. Periksa NISN dan pilihan kelas; belum ada nilai yang disimpan.' }
       }
-      recordsToSave.push({ classId, studentId, semester, uh: row.uh, asts: row.asts, asas: row.asas, score: row.score })
+      recordsToSave.push({ subjectCode, subjectName: subject.name, classId, studentId, semester, uh: row.uh, asts: row.asts, asas: row.asas, score: row.score })
     }
 
     await gradeQueries.upsertMany(recordsToSave)
@@ -52,9 +57,9 @@ export async function editGradeAction(formData: FormData) {
   try {
     await requireAdminEmail()
     const parsed = editGradeSchema.safeParse(Object.fromEntries(formData))
-    if (!parsed.success) return { error: 'Periksa kelas, semester, dan nilai. Semua nilai wajib berupa angka 0–100.' }
-    const { classId, semester, studentId, ...values } = parsed.data
-    const result = await gradeQueries.updateOne(classId, semester, studentId, values)
+    if (!parsed.success) return { error: 'Periksa kelas, semester, dan nilai. Nilai rapor wajib berupa angka 0–100. UH, ASTS, dan ASAS boleh kosong atau berupa angka 0–100.' }
+    const { classId, semester, studentId, subjectCode, ...values } = parsed.data
+    const result = await gradeQueries.updateOne(classId, semester, studentId, subjectCode, values)
     if (result.count !== 1) return { error: 'Nilai siswa tidak ditemukan pada kelas dan semester ini. Muat ulang halaman.' }
     refreshGrades()
     return { success: true }
@@ -66,9 +71,9 @@ export async function editGradeAction(formData: FormData) {
 export async function deleteGradeRecapAction(formData: FormData) {
   try {
     await requireAdminEmail()
-    const parsed = gradeScopeSchema.safeParse(Object.fromEntries(formData))
+    const parsed = subjectGradeScopeSchema.safeParse(Object.fromEntries(formData))
     if (!parsed.success) return { error: 'Kelas dan semester/tahun ajaran wajib valid.' }
-    await gradeQueries.deleteByClassSemester(parsed.data.classId, parsed.data.semester)
+    await gradeQueries.deleteByClassSemester(parsed.data.classId, parsed.data.semester, parsed.data.subjectCode)
     refreshGrades()
     return { success: true }
   } catch {

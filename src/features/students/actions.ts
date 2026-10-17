@@ -125,6 +125,7 @@ export async function uploadIjazahAction(studentId: string, formData: FormData) 
     // Retire the old file only after the new URL is safely stored.
     if (student.ijazahUrl) await storageService.deleteDocument(student.ijazahUrl).catch(() => {})
 
+    revalidatePath('/admin/data-siswa')
     revalidatePath(`/admin/data-siswa/${studentId}`)
     revalidatePath('/data-siswa', 'layout')
     return { success: true }
@@ -143,6 +144,7 @@ export async function deleteIjazahAction(studentId: string) {
       await storageService.deleteDocument(student.ijazahUrl).catch(() => {})
     }
 
+    revalidatePath('/admin/data-siswa')
     revalidatePath(`/admin/data-siswa/${studentId}`)
     revalidatePath('/data-siswa', 'layout')
     return { success: true }
@@ -169,6 +171,7 @@ export async function getStudentByNISNAction(nisn: string) {
       score: g.score,
       uh: g.uh,
       asts: g.asts,
+      subjectName: g.subjectName,
       asas: g.asas,
     }))
 

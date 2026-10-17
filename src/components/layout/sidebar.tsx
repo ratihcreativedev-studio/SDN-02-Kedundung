@@ -80,8 +80,8 @@ function NavLinks({ pathname, onClick }: { pathname: string; onClick?: () => voi
                 { href: '/admin/data-siswa', name: 'Siswa' },
                 { href: '/admin/alumni', name: 'Alumni' },
               ] : item.href === '/admin/nilai' ? [
-                { href: '/admin/nilai', name: 'Nilai UH, ASTS, ASAS dan Rapor' },
-                { href: '/admin/nilai/mata-pelajaran', name: 'Nilai Mata Pelajaran' },
+                { href: '/admin/nilai', name: 'Nilai Mata Pelajaran' },
+                { href: '/admin/nilai/mata-pelajaran', name: 'Rekap Nilai' },
                 { href: '/admin/nilai/ekstrakurikuler', name: 'Nilai Ekstrakurikuler' },
               ] : undefined
               const matches = (href: string) => pathname === href || (href !== '/admin' && href !== '/admin/nilai' && pathname.startsWith(`${href}/`))
