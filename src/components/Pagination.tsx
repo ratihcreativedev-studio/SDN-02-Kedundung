@@ -1,5 +1,6 @@
 'use client'
 
+import { useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
@@ -7,6 +8,7 @@ export function Pagination({ totalPages, currentPage }: { totalPages: number; cu
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const router = useRouter()
+  const [pending, startTransition] = useTransition()
 
   const createPageURL = (pageNumber: number | string) => {
     const params = new URLSearchParams(searchParams)
@@ -15,7 +17,7 @@ export function Pagination({ totalPages, currentPage }: { totalPages: number; cu
   }
 
   const handlePageChange = (page: number) => {
-    router.push(createPageURL(page))
+    startTransition(() => router.push(createPageURL(page), { scroll: false }))
   }
 
   if (totalPages <= 1) return null
@@ -36,20 +38,21 @@ export function Pagination({ totalPages, currentPage }: { totalPages: number; cu
   }
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 sm:px-6 mt-4 bg-surface-alt/50 rounded-xl border border-border">
+    <div aria-busy={pending} className="flex items-center justify-between px-4 py-3 sm:px-6 mt-4 bg-surface-alt/50 rounded-xl border border-border">
+      {pending && <span role="status" className="sr-only">Memuat halaman...</span>}
       <div className="flex flex-1 flex-col gap-3 sm:hidden">
         <p className="text-center text-sm text-text-secondary">Halaman {currentPage} dari {totalPages}</p>
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage <= 1}
+            disabled={pending || currentPage <= 1}
             className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border bg-white px-2 py-2 text-sm font-medium text-primary hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Sebelumnya
           </button>
           <button
             onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage >= totalPages}
+            disabled={pending || currentPage >= totalPages}
             className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border bg-white px-2 py-2 text-sm font-medium text-primary hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Selanjutnya
@@ -66,7 +69,7 @@ export function Pagination({ totalPages, currentPage }: { totalPages: number; cu
           <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage <= 1}
+              disabled={pending || currentPage <= 1}
               className="relative inline-flex items-center rounded-l-md px-2 py-2 text-text-secondary ring-1 ring-inset ring-border hover:bg-surface-alt focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed bg-white transition-colors"
             >
               <span className="sr-only">Previous</span>
@@ -81,6 +84,7 @@ export function Pagination({ totalPages, currentPage }: { totalPages: number; cu
               ) : (
                 <button
                   key={`page-${p}`}
+                  disabled={pending || p === currentPage}
                   aria-current={p === currentPage ? 'page' : undefined}
                   onClick={() => handlePageChange(p as number)}
                   className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 focus:outline-offset-0 ring-1 ring-inset ring-border transition-colors ${
@@ -96,7 +100,7 @@ export function Pagination({ totalPages, currentPage }: { totalPages: number; cu
 
             <button
               onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage >= totalPages}
+              disabled={pending || currentPage >= totalPages}
               className="relative inline-flex items-center rounded-r-md px-2 py-2 text-text-secondary ring-1 ring-inset ring-border hover:bg-surface-alt focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed bg-white transition-colors"
             >
               <span className="sr-only">Next</span>

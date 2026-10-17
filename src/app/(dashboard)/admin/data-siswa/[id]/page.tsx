@@ -1,4 +1,4 @@
-import { StudentGradeTable } from '@/features/grades/components/StudentGradeTable'
+import { StudentAllGrades } from '@/features/grades/components/StudentAllGrades'
 import { studentService } from '@/features/students/services'
 import { gradeQueries } from '@/features/grades/queries'
 import { getStudentAttendanceHistory, type StudentAttendanceHistory } from '@/features/attendance/student-history'
@@ -22,11 +22,15 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   const resolvedParams = await params
   let student: Awaited<ReturnType<typeof studentService.getById>>
   let grades: Awaited<ReturnType<typeof gradeQueries.findByStudent>> = []
+  let ledgers: Awaited<ReturnType<typeof gradeQueries.findLedgerByStudent>> = []
   let attendanceHistory: StudentAttendanceHistory = { recaps: [], monthly: [] }
   try {
     student = await studentService.getById(resolvedParams.id)
-    grades = await gradeQueries.findByStudent(student.id)
-    attendanceHistory = await getStudentAttendanceHistory(student.id)
+    ;[grades, ledgers, attendanceHistory] = await Promise.all([
+      gradeQueries.findByStudent(student.id),
+      gradeQueries.findLedgerByStudent(student.id),
+      getStudentAttendanceHistory(student.id),
+    ])
   } catch {
     notFound()
   }
@@ -77,14 +81,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
               <BookOpen size={20} className="text-orange-600" />
               <h3 className="text-lg font-bold text-primary">Rincian Nilai Siswa</h3>
             </div>
-            <StudentGradeTable grades={grades.map(grade => ({
-              id: grade.id,
-              semester: grade.semester,
-              uh: grade.uh,
-              asts: grade.asts,
-              asas: grade.asas,
-              score: grade.score,
-            }))} />
+            <StudentAllGrades grades={grades} ledgers={ledgers} />
           </section>
 
           {/* Data Diri */}

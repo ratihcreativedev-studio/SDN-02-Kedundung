@@ -1,5 +1,6 @@
 'use client'
 
+import { AssessmentSearch } from '@/features/assessment/Search'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition, type ReactNode } from 'react'
 
@@ -9,11 +10,13 @@ export function AttendanceFilter({
   classId,
   semester,
   children,
+  search,
 }: {
   basePath?: '/admin/absensi' | '/absensi'
   classes: { id: string; name: string }[]
   classId: string
   semester: string
+  search?: string
   children?: ReactNode
 }) {
   const router = useRouter()
@@ -26,8 +29,9 @@ export function AttendanceFilter({
   const semesters = Array.from({ length: lastYear - firstYear + 1 }, (_, index) => firstYear + index)
     .flatMap(year => [`Ganjil ${year}/${year + 1}`, `Genap ${year}/${year + 1}`])
 
-  const applyFilters = (nextClass: string, nextYear: string) => {
+  const applyFilters = (nextClass: string, nextYear: string, query = search ?? '') => {
     const params = new URLSearchParams({ classId: nextClass, semester: nextYear })
+    if (query) params.set('search', query)
     startTransition(() => router.push(`${basePath}?${params.toString()}`, { scroll: false }))
   }
 
@@ -60,6 +64,7 @@ export function AttendanceFilter({
         </select>
       </label>
 
+      {search !== undefined && <AssessmentSearch key={search} search={search} pending={isPending} onSearch={value => applyFilters(cls, sem, value)} />}
     </div>
     {isPending ? (
       <div role="status" aria-live="polite" className="section-card p-8 text-center text-sm text-text-secondary">

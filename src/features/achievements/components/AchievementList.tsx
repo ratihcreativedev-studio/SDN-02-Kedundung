@@ -13,7 +13,7 @@ export async function AchievementList({
   const page = Number(searchParams?.page) || 1
   const limit = 10
 
-  const { data: achievements, totalPages } = await achievementService.getPaginated({
+  const { data: achievements, totalPages, page: currentPage } = await achievementService.getPaginated({
     page,
     limit,
   })
@@ -75,7 +75,7 @@ export async function AchievementList({
         </div>
       </div>
 
-      <Pagination currentPage={page} totalPages={totalPages} />
+      <Pagination currentPage={currentPage} totalPages={totalPages} />
     </div>
   )
 }

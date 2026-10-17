@@ -1,9 +1,9 @@
 import { StudentBiodata } from '@/features/students/components/StudentBiodata'
 import { StudentAttendanceRecap } from '@/features/attendance/components/StudentAttendanceRecap'
-import { StudentGradeTable } from '@/features/grades/components/StudentGradeTable'
+import { StudentAllGrades } from '@/features/grades/components/StudentAllGrades'
 import { getStudentByNISNAction } from '@/features/students/actions'
 import Link from 'next/link'
-import { ArrowLeft, User, BookOpen, Download, Award, Info, StickyNote } from 'lucide-react'
+import { ArrowLeft, User, BookOpen, Download, StickyNote } from 'lucide-react'
 
 export async function generateMetadata({ params }: { params: Promise<{ nisn: string }> }) {
   const resolvedParams = await params
@@ -126,29 +126,13 @@ export default async function PublicStudentDetailPage({ params }: { params: Prom
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-primary">Daftar Nilai</h3>
-                    <p className="text-xs text-text-secondary">Rincian UH, ASTS, ASAS, dan Nilai Rapor per semester</p>
+                    <p className="text-xs text-text-secondary">Nilai UH, ASTS, ASAS, rapor, mata pelajaran, dan ekstrakurikuler per semester</p>
                   </div>
                 </div>
-                {studentData.gradeDetails && studentData.gradeDetails.length > 0 && (
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-50 text-orange-700 border border-orange-200">
-                    <Award size={13} />
-                    {studentData.gradeDetails.length} Rekord Nilai
-                  </span>
-                )}
+
               </div>
 
-              {studentData.gradeDetails && studentData.gradeDetails.length > 0 ? (
-                <div className="space-y-5">
-                  <StudentGradeTable grades={studentData.gradeDetails} />
-
-                </div>
-              ) : (
-                <div className="text-center py-8 bg-surface-alt/30 rounded-xl border border-dashed border-border">
-                  <Info className="mx-auto h-8 w-8 text-text-muted mb-2" />
-                  <p className="text-sm font-semibold text-text-primary">Belum Ada Data Nilai</p>
-                  <p className="text-xs text-text-secondary mt-1">Data nilai untuk siswa ini belum diinput oleh pihak sekolah.</p>
-                </div>
-              )}
+              <StudentAllGrades grades={studentData.gradeDetails} ledgers={studentData.ledgerDetails} />
             </div>
 
             <StudentAttendanceRecap history={studentData.attendanceHistory} />

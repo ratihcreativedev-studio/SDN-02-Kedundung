@@ -1,5 +1,6 @@
 import { CalendarCheck } from 'lucide-react'
-import { getAttendancePageData } from '@/features/attendance/page-data'
+import { getAssessmentPageData } from '@/features/assessment/page-data'
+import { Pagination } from '@/components/Pagination'
 import { AttendanceUploadClient } from '@/features/attendance/components/AttendanceUploadClient'
 import { AttendanceFilter } from '@/features/attendance/components/AttendanceFilter'
 import { semesterSchema } from '@/features/attendance/schemas'
@@ -12,12 +13,12 @@ export const metadata = {
 export default async function AdminAbsensiPage({
   searchParams,
 }: {
-  searchParams: Promise<{ classId?: string; semester?: string }>
+  searchParams: Promise<{ classId?: string; semester?: string; page?: string; search?: string }>
 }) {
   const params = await searchParams
   const parsedYear = semesterSchema.safeParse(params.semester)
   const semester = parsedYear.success ? parsedYear.data : 'Ganjil 2025/2026'
-  const { classes, classId, students, attendances } = await getAttendancePageData(params.classId, semester)
+  const { classes, classId, students, attendances, recordCount, pagination, search } = await getAssessmentPageData({ ...params, semester }, 'attendance')
 
   const className = classes.find(item => item.id === classId)?.name ?? 'Kelas'
   const attendanceMap = Object.fromEntries(attendances.map(item => [item.studentId, item]))
@@ -31,10 +32,12 @@ export default async function AdminAbsensiPage({
         iconGradient="from-teal-500 to-teal-600"
       />
 
-      <AttendanceFilter key={`${classId}-${semester}`} classes={classes} classId={classId} semester={semester} basePath="/admin/absensi">
-        {classId ? <AttendanceUploadClient key={`${classId}-${semester}`} classId={classId} className={className} semester={semester} students={students} attendanceMap={attendanceMap} /> : (
+      <AttendanceFilter search={search} key={`${classId}-${semester}-${search}`} classes={classes} classId={classId} semester={semester} basePath="/admin/absensi">
+        {search && <p role="status" className="text-sm text-text-secondary">{pagination.total} siswa ditemukan untuk “{search}”.</p>}
+        {classId ? <AttendanceUploadClient key={`${classId}-${semester}`} classId={classId} className={className} semester={semester} students={students} attendanceMap={attendanceMap} totalCount={recordCount} /> : (
           <div className="section-card"><div className="empty-state"><p className="text-sm text-text-muted">Tambahkan kelas terlebih dahulu.</p></div></div>
         )}
+        {recordCount > 0 && <Pagination currentPage={pagination.page} totalPages={pagination.totalPages} />}
       </AttendanceFilter>
     </div>
   )

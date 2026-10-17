@@ -157,8 +157,11 @@ import { getStudentAttendanceHistory } from '@/features/attendance/student-histo
 export async function getStudentByNISNAction(nisn: string) {
   try {
     const student = await studentService.getByNisn(nisn)
-    const grades = await gradeQueries.findByStudent(student.id)
-    const attendanceHistory = await getStudentAttendanceHistory(student.id)
+    const [grades, ledgerDetails, attendanceHistory] = await Promise.all([
+      gradeQueries.findByStudent(student.id),
+      gradeQueries.findLedgerByStudent(student.id),
+      getStudentAttendanceHistory(student.id),
+    ])
 
     const gradeDetails = grades.map(g => ({
       id: g.id,
@@ -174,6 +177,7 @@ export async function getStudentByNISNAction(nisn: string) {
       data: {
         ...student,
         gradeDetails,
+        ledgerDetails,
         attendanceHistory
       }
     }

@@ -4,6 +4,8 @@ import Link, { useLinkStatus } from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
+  ChevronDown,
+  BookOpen,
   CalendarCheck,
   ClipboardList,
   GraduationCap,
@@ -27,8 +29,9 @@ const navSections = [
   {
     label: 'Akademik',
     items: [
-      { name: 'Siswa', href: '/admin/data-siswa', icon: GraduationCap },
-      { name: 'Alumni', href: '/admin/alumni', icon: GraduationCap },
+      { name: 'Peserta Didik', href: '/admin/data-siswa', icon: GraduationCap },
+      { name: 'Mata Pelajaran', href: '/admin/mata-pelajaran', icon: BookOpen },
+      { name: 'Ekstrakurikuler', href: '/admin/ekstrakurikuler', icon: Trophy },
       { name: 'Kelas', href: '/admin/kelas', icon: School },
       { name: 'Guru & Staff', href: '/admin/guru', icon: Users },
     ],
@@ -73,9 +76,26 @@ function NavLinks({ pathname, onClick }: { pathname: string; onClick?: () => voi
           </p>
           <div className="space-y-0.5">
             {section.items.map((item) => {
-              const isActive =
-                pathname === item.href ||
-                (item.href !== '/admin' && pathname.startsWith(item.href))
+              const children = item.href === '/admin/data-siswa' ? [
+                { href: '/admin/data-siswa', name: 'Siswa' },
+                { href: '/admin/alumni', name: 'Alumni' },
+              ] : item.href === '/admin/nilai' ? [
+                { href: '/admin/nilai', name: 'Nilai UH, ASTS, ASAS dan Rapor' },
+                { href: '/admin/nilai/mata-pelajaran', name: 'Nilai Mata Pelajaran' },
+                { href: '/admin/nilai/ekstrakurikuler', name: 'Nilai Ekstrakurikuler' },
+              ] : undefined
+              const matches = (href: string) => pathname === href || (href !== '/admin' && href !== '/admin/nilai' && pathname.startsWith(`${href}/`))
+              const isActive = children ? children.some(child => matches(child.href)) : matches(item.href)
+              if (children) return (
+                <details key={item.name} open={isActive || undefined} className="group/menu">
+                  <summary className={`flex min-h-11 cursor-pointer list-none items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium focus-visible:outline-2 focus-visible:outline-primary [&::-webkit-details-marker]:hidden ${isActive ? 'bg-primary/10 text-primary' : 'text-text-secondary hover:bg-primary/5'}`}>
+                    <item.icon className="h-4.5 w-4.5 shrink-0" /><span>{item.name}</span><ChevronDown className="ml-auto h-4 w-4 shrink-0 transition-transform group-open/menu:rotate-180" />
+                  </summary>
+                  <div className="ml-5 mt-1 space-y-1 border-l border-border pl-2">
+                    {children.map(child => <Link key={child.href} href={child.href} onClick={onClick} aria-current={matches(child.href) ? 'page' : undefined} className={`flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-primary ${matches(child.href) ? 'bg-primary text-white' : 'text-text-secondary hover:bg-primary/5 hover:text-primary'}`}><span>{child.name}</span><NavigationPending /></Link>)}
+                  </div>
+                </details>
+              )
               return (
                 <Link
                   key={item.name}

@@ -89,3 +89,6 @@ next-env.d.ts
 
 !prisma/sql/20261016_attendance_semesters.sql
 !prisma/sql/20261017_student_mother_job.sql
+!prisma/sql/20261017_grade_ledger.sql
+
+!prisma/sql/20261017_academic_catalog.sql

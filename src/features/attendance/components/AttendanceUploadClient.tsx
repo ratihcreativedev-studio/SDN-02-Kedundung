@@ -9,7 +9,8 @@ import { AttendanceRow, type AttendanceValues } from './AttendanceRow'
 
 const initialState = { error: '', success: false }
 
-export function AttendanceUploadClient({ classId, className, semester, students, attendanceMap }: {
+export function AttendanceUploadClient({ classId, className, semester, students, attendanceMap, totalCount }: {
+  totalCount?: number
   classId: string
   className: string
   semester: string
@@ -42,7 +43,7 @@ export function AttendanceUploadClient({ classId, className, semester, students,
     if (inputRef.current) inputRef.current.value = ''
     return { error: '', success: true }
   }, initialState)
-  const count = Object.keys(attendanceMap).length
+  const count = totalCount ?? Object.keys(attendanceMap).length
   const hasData = count > 0
   const busy = uploading || deleting
 
@@ -120,7 +121,7 @@ export function AttendanceUploadClient({ classId, className, semester, students,
               <thead className="bg-surface-alt text-text-secondary">
                 <tr>{['NISN', 'Nama Siswa', 'HADIR', 'SAKIT', 'IJIN', 'ALPA', 'Aksi'].map(label => <th scope="col" key={label} className="px-4 py-3 font-semibold">{label}</th>)}</tr>
               </thead>
-              <tbody>{students.map(student => <AttendanceRow key={`${student.id}-${JSON.stringify(attendanceMap[student.id])}`} student={student} attendance={attendanceMap[student.id]} classId={classId} semester={semester} disabled={busy} />)}</tbody>
+              <tbody>{students.length === 0 && <tr><td colSpan={7} className="px-4 py-8 text-center text-text-muted">Tidak ada siswa yang cocok dengan pencarian.</td></tr>}{students.map(student => <AttendanceRow key={`${student.id}-${JSON.stringify(attendanceMap[student.id])}`} student={student} attendance={attendanceMap[student.id]} classId={classId} semester={semester} disabled={busy} />)}</tbody>
             </table>
           </div>
       </section>

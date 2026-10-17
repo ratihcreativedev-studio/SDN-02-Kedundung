@@ -9,7 +9,8 @@ import { GradeRow, type GradeValues } from './GradeRow'
 
 const initialState = { error: '', success: false }
 
-export function GradeUploadClient({ classId, className, semester, students, gradeMap }: {
+export function GradeUploadClient({ classId, className, semester, students, gradeMap, totalCount }: {
+  totalCount?: number
   classId: string
   className: string
   semester: string
@@ -42,7 +43,7 @@ export function GradeUploadClient({ classId, className, semester, students, grad
     if (inputRef.current) inputRef.current.value = ''
     return { error: '', success: true }
   }, initialState)
-  const count = Object.keys(gradeMap).length
+  const count = totalCount ?? Object.keys(gradeMap).length
   const hasData = count > 0
   const busy = uploading || deleting
 
@@ -120,7 +121,7 @@ export function GradeUploadClient({ classId, className, semester, students, grad
               <thead className="bg-surface-alt text-text-secondary">
                 <tr>{['NISN', 'Nama Siswa', 'UH', 'ASTS', 'ASAS', 'Nilai Rapor', 'Aksi'].map(label => <th scope="col" key={label} className="px-4 py-3 font-semibold">{label}</th>)}</tr>
               </thead>
-              <tbody>{students.map(student => <GradeRow key={`${student.id}-${JSON.stringify(gradeMap[student.id])}`} student={student} grade={gradeMap[student.id]} classId={classId} semester={semester} disabled={busy} />)}</tbody>
+              <tbody>{students.length === 0 && <tr><td colSpan={7} className="px-4 py-8 text-center text-text-muted">Tidak ada siswa yang cocok dengan pencarian.</td></tr>}{students.map(student => <GradeRow key={`${student.id}-${JSON.stringify(gradeMap[student.id])}`} student={student} grade={gradeMap[student.id]} classId={classId} semester={semester} disabled={busy} />)}</tbody>
             </table>
           </div>
       </section>

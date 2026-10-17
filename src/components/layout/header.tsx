@@ -15,6 +15,8 @@ function getPageTitle(pathname: string): string {
     '/admin': 'Dashboard',
     '/admin/data-siswa': 'Data Siswa',
     '/admin/alumni': 'Data Alumni',
+    '/admin/mata-pelajaran': 'Data Mata Pelajaran',
+    '/admin/ekstrakurikuler': 'Data Ekstrakurikuler',
     '/admin/kelas': 'Data Kelas',
     '/admin/guru': 'Guru & Staff',
     '/admin/absensi': 'Absensi',

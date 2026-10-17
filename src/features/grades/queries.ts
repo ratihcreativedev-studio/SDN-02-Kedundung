@@ -3,6 +3,18 @@ import { randomUUID } from 'node:crypto'
 import { db } from '@/lib/db'
 
 export const gradeQueries = {
+  findLedgerByStudent: (studentId: string) => db.ledgerReport.findMany({
+    where: { studentId, OR: [
+      { subjects: { some: { score: { not: null } } } },
+      { extracurriculars: { some: { predicate: { not: null } } } },
+    ] },
+    select: {
+      id: true, semester: true, class: { select: { name: true } },
+      subjects: { where: { score: { not: null } }, select: { code: true, name: true, score: true } },
+      extracurriculars: { where: { predicate: { not: null } }, select: { code: true, name: true, predicate: true } },
+    },
+    orderBy: { semester: 'desc' },
+  }),
   findByClassSemester: (classId: string, semester: string) => {
     return db.studentReport.findMany({
       where: {

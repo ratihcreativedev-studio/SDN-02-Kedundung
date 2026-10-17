@@ -1,3 +1,4 @@
+import { paginationWindow } from '@/lib/pagination'
 import { achievementQueries } from './queries'
 import type { AchievementInput } from './schemas'
 
@@ -7,13 +8,11 @@ export const achievementService = {
   },
 
   async getPaginated({ page = 1, limit = 10 }: { page?: number; limit?: number }) {
-    const skip = (page - 1) * limit
-    const [data, total] = await Promise.all([
-      achievementQueries.findPaginated({ skip, take: limit }),
-      achievementQueries.countAll(),
-    ])
-    const totalPages = Math.ceil(total / limit)
-    return { data, total, totalPages }
+    const safeLimit = Number.isSafeInteger(limit) && limit > 0 ? Math.min(limit, 100) : 10
+    const total = await achievementQueries.countAll()
+    const pagination = paginationWindow(page, total, safeLimit)
+    const data = await achievementQueries.findPaginated({ skip: pagination.skip, take: pagination.take })
+    return { data, total, totalPages: pagination.totalPages, page: pagination.page }
   },
 
   async getById(id: string) {

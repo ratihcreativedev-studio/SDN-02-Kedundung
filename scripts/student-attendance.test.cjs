@@ -49,7 +49,7 @@ test('public student lookup returns semester attendance for the resolved student
   const api = load('src/features/students/actions.ts', {
     'next/cache': {}, './schemas': {}, './queries': {}, '@/lib/auth': {}, '@/services/storage.service': {},
     './services': { studentService: { getByNisn: async () => ({ id: 'student-2', nisn: '001', name: 'Siswa' }) } },
-    '@/features/grades/queries': { gradeQueries: { findByStudent: async () => [] } },
+    '@/features/grades/queries': { gradeQueries: { findByStudent: async () => [], findLedgerByStudent: async () => [] } },
     '@/features/attendance/student-history': history,
   })
   const result = await api.getStudentByNISNAction('001')

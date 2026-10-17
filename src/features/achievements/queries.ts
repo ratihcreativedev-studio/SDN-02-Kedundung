@@ -18,7 +18,7 @@ export const achievementQueries = {
   findAll: () => {
     return db.achievement.findMany({
       include: { student: { include: { class: true } } },
-      orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
+      orderBy: [{ date: 'desc' }, { createdAt: 'desc' }, { id: 'asc' }],
     })
   },
 
@@ -27,7 +27,7 @@ export const achievementQueries = {
       skip,
       take,
       include: { student: { include: { class: true } } },
-      orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
+      orderBy: [{ date: 'desc' }, { createdAt: 'desc' }, { id: 'asc' }],
     })
   },
 
