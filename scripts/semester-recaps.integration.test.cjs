@@ -179,7 +179,7 @@ test('semester recaps: real database, Excel actions, and admin/public student re
           const data = form(newPeriod)
           data.set('category', 'ekstrakurikuler')
           const book = xlsx.utils.book_new()
-          const rows = [['TAHUN BEBAS'], [], [], ['NO', 'NAMA SISWA', 'NISN', 'NIS', 'Ekstra Kurikuler'], [null, null, null, null, 'BTQ', 'Pramuka'], [], [], [1, student.name, Number(student.nisn), 1, predicate, 'B']]
+          const rows = [['TAHUN BEBAS'], [], [], ['NO', 'NAMA SISWA', 'NISN', 'NIS', 'ekstra kulikuler'], [null, null, null, null, 'BTQ', 'Pramuka'], [], [], [1, student.name, Number(student.nisn), 1, predicate, 'B']]
           if (invalidNisn) rows.push([2, 'Tidak terdaftar', '0000000000', 2, 'B', 'B'])
           xlsx.utils.book_append_sheet(book, xlsx.utils.aoa_to_sheet(rows), 'Nilai Ekstra')
           data.set('file', new File([xlsx.write(book, { type: 'buffer', bookType: 'xlsx' })], 'ekstra.xlsx'))
@@ -201,6 +201,51 @@ test('semester recaps: real database, Excel actions, and admin/public student re
         assert.equal((await actions.deleteLedgerRecapAction(deletion)).success, true)
         assert.equal(await tx.ledgerExtracurricularGrade.count({ where: { report: { studentId: student.id } } }), 0)
         assert.deepEqual(await tx.studentReport.findMany({ where: { studentId: student.id }, orderBy: { id: 'asc' } }), gradesBefore)
+      })
+      await t.test('bulk extracurricular upload preserves omitted activities, students and semesters', async () => {
+        const actions = load('src/features/grades/ledger/actions.ts')
+        const roster = Array.from({ length: 40 }, (_, index) => ({
+          id: `${fixtureId}-${index}`, nisn: String(9000000000 + randomInt(10000000) * 40 + index),
+          name: `Siswa Uji ${index}`, classId: cls.id,
+        }))
+        await tx.student.createMany({ data: roster })
+        const original = await tx.ledgerReport.create({ data: {
+          studentId: roster[0].id, classId: cls.id, semester: newPeriod, sakit: 2,
+          subjects: { create: { code: 'MU', name: 'Matematika', score: 85 } },
+          extracurriculars: { create: { code: 'TARI', name: 'Tari', predicate: 'SB' } },
+        }, include: { subjects: true, extracurriculars: true } })
+        const historical = await tx.ledgerReport.create({ data: {
+          studentId: roster[0].id, classId: cls.id, semester: oldPeriod,
+          extracurriculars: { create: { code: 'BTQ', name: 'BTQ', predicate: 'K' } },
+        }, include: { extracurriculars: true } })
+        async function upload(students, predicate) {
+          const book = xlsx.utils.book_new()
+          xlsx.utils.book_append_sheet(book, xlsx.utils.aoa_to_sheet([
+            ['NO', 'NAMA SISWA', 'NISN', 'NIS', 'ekstra kulikuler'],
+            [null, null, null, null, 'BTQ', 'Pramuka'], [], [],
+            ...students.map((row, index) => [index + 1, row.name, row.nisn, index + 1, predicate, 'B']),
+          ]), 'Ekstra')
+          const data = form(newPeriod)
+          data.set('category', 'ekstrakurikuler')
+          data.set('file', new File([xlsx.write(book, { type: 'buffer', bookType: 'xlsx' })], 'ekstra.xlsx'))
+          const result = await actions.uploadLedgerAction(data)
+          assert.equal(result.success, true, result.error)
+          assert.equal(result.count, students.length)
+        }
+        await upload(roster, 'SB')
+        await upload(roster.slice(0, 39), '')
+        const saved = await tx.ledgerReport.findMany({ where: { studentId: { in: roster.map(row => row.id) }, semester: newPeriod }, include: { subjects: true, extracurriculars: true } })
+        assert.equal(saved.length, 40)
+        for (const report of saved) {
+          assert.equal(report.extracurriculars.find(item => item.code === 'BTQ').predicate, report.studentId === roster[39].id ? 'SB' : null)
+          assert.equal(report.extracurriculars.find(item => item.code === 'PRAMUKA').predicate, 'B')
+        }
+        const first = saved.find(row => row.studentId === roster[0].id)
+        assert.equal(first.id, original.id)
+        assert.equal(first.sakit, 2)
+        assert.deepEqual(first.subjects, original.subjects)
+        assert.deepEqual(first.extracurriculars.find(item => item.code === 'TARI'), original.extracurriculars[0])
+        assert.deepEqual(await tx.ledgerReport.findUnique({ where: { id: historical.id }, include: { extracurriculars: true } }), historical)
       })
       throw rollback
     }, { timeout: 150000, maxWait: 15000 })

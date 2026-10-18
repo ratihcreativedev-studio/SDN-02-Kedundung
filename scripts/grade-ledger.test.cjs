@@ -62,8 +62,7 @@ test('upload enforces authorization, semester and class before saving extracurri
     '@/lib/auth': { requireAdminEmail: async () => { if (!authorized) throw Error('Unauthorized') } },
     '@/lib/db': { db: {
       student: { findMany: async () => roster ? [{ id: 'student', nisn: '0012345678' }] : [] },
-      ledgerReport: { upsert: value => { writes.push(value); return Promise.resolve(value) } },
-      $transaction: values => Promise.all(values),
+      $executeRaw: async (strings, ...values) => { writes.push({ sql: strings.join('?'), values }); return 8 },
     } },
     'next/cache': { revalidatePath() {} },
   }).uploadLedgerAction
@@ -82,16 +81,19 @@ test('upload enforces authorization, semester and class before saving extracurri
   assert.ok((await action(form)).error); assert.equal(writes.length, 0)
   form.set('semester', 'Ganjil 2028/2029')
   assert.equal((await action(form)).success, true)
-  assert.equal(writes[0].update.subjects, undefined)
-  assert.equal(writes[0].update.sakit, undefined)
-  assert.equal(writes[0].update.izin, undefined)
-  assert.equal(writes[0].update.alpha, undefined)
-  assert.equal(writes[0].update.extracurriculars.create.length, 8)
-  assert.equal(writes[0].create.extracurriculars.create.length, 8)
-  assert.equal(writes[0].create.subjects, undefined)
-  assert.equal(writes[0].update.extracurriculars.create.find(s => s.code === 'BTQ').predicate, 'SB')
-  assert.equal(writes[0].update.extracurriculars.create[0].predicate, null)
-  assert.equal(writes[0].where.studentId_semester.semester, 'Ganjil 2028/2029')
+  assert.equal(writes.length, 1)
+  const { sql, values } = writes[0]
+  assert.match(sql, /ON CONFLICT \("studentId", semester\) DO UPDATE/)
+  assert.match(sql, /ON CONFLICT \("reportId", code\) DO UPDATE/)
+  assert.doesNotMatch(sql, /DELETE|ledger_subject_grades|sakit|izin|alpha/)
+  assert.ok(values.includes('class'))
+  assert.ok(values.includes('Ganjil 2028/2029'))
+  assert.ok(!sql.includes('Ganjil 2028/2029'))
+  const records = JSON.parse(values[0])
+  assert.equal(records[0].studentId, 'student')
+  assert.equal(records[0].extracurriculars.length, 8)
+  assert.equal(records[0].extracurriculars.find(s => s.code === 'BTQ').predicate, 'SB')
+  assert.equal(records[0].extracurriculars[0].predicate, null)
   writes = []; form.set('category', 'mata-pelajaran')
   assert.match((await action(form)).error, /melalui menu Nilai Mata Pelajaran/)
   assert.equal(writes.length, 0)

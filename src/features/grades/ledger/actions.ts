@@ -7,6 +7,7 @@ import { gradeScopeSchema } from '../schemas'
 import { parseExtracurricularWorkbook } from './extracurricular-excel'
 import { ledgerEditScopeSchema, ledgerScopeSchema, ledgerValuesSchema } from './schemas'
 import { catalogQueries } from '@/features/academic-catalog/queries'
+import { randomUUID } from 'node:crypto'
 
 function refreshStudentDetails() {
   revalidatePath('/admin/data-siswa', 'layout')
@@ -28,20 +29,31 @@ export async function uploadLedgerAction(data: FormData) {
     const roster = await db.student.findMany({ where: { classId }, select: { id: true, nisn: true } })
     const ids = new Map(roster.map(s => [s.nisn, s.id]))
     if (parsed.rows.some(row => !ids.has(row.nisn))) return { error: 'Ada NISN yang tidak terdaftar di kelas terpilih. Belum ada nilai yang disimpan.' }
-    await db.$transaction(parsed.rows.map(row => {
-      const values = {
-        extracurriculars: { deleteMany: { code: { in: row.extracurriculars.map(item => item.code) } }, create: row.extracurriculars },
-      }
-      const createValues = {
-        extracurriculars: { create: row.extracurriculars },
-      }
-      const studentId = ids.get(row.nisn)!
-      return db.ledgerReport.upsert({
-        where: { studentId_semester: { studentId, semester } },
-        create: { studentId, classId, semester, ...createValues },
-        update: { classId, ...values },
-      })
+    const records = parsed.rows.map(row => ({
+      id: randomUUID(), studentId: ids.get(row.nisn)!,
+      extracurriculars: row.extracurriculars.map(item => ({ ...item, id: randomUUID() })),
     }))
+    // One atomic statement avoids per-student nested writes exhausting the transaction timeout.
+    // Only activities present in the workbook are updated, including explicit blank predicates.
+    await db.$executeRaw`
+      WITH input AS (
+        SELECT * FROM jsonb_to_recordset(${JSON.stringify(records)}::jsonb)
+          AS row(id text, "studentId" text, extracurriculars jsonb)
+      ), reports AS (
+        INSERT INTO ledger_reports (id, "classId", "studentId", semester, "createdAt", "updatedAt")
+        SELECT id, ${classId}, "studentId", ${semester}, NOW(), NOW() FROM input
+        ON CONFLICT ("studentId", semester) DO UPDATE
+          SET "classId" = EXCLUDED."classId", "updatedAt" = EXCLUDED."updatedAt"
+        RETURNING id, "studentId"
+      )
+      INSERT INTO ledger_extracurricular_grades (id, "reportId", code, name, predicate)
+      SELECT activity.id, reports.id, activity.code, activity.name, activity.predicate
+      FROM input JOIN reports ON reports."studentId" = input."studentId"
+      CROSS JOIN LATERAL jsonb_to_recordset(input.extracurriculars)
+        AS activity(id text, code text, name text, predicate text)
+      ON CONFLICT ("reportId", code) DO UPDATE
+        SET name = EXCLUDED.name, predicate = EXCLUDED.predicate
+    `
     revalidatePath('/admin/nilai/mata-pelajaran')
     revalidatePath('/admin/nilai/ekstrakurikuler')
     refreshStudentDetails()
