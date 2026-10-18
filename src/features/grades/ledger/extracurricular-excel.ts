@@ -10,7 +10,8 @@ export function parseExtracurricularWorkbook(buffer: Buffer, catalog: CatalogIte
   if (!sheet) throw new Error('Excel tidak memiliki lembar data.')
   const rows = xlsx.utils.sheet_to_json<unknown[]>(sheet, { header: 1, defval: null, blankrows: true })
   const header = rows.findIndex(row => normalize(row[0]) === 'NO' && normalize(row[1]) === 'NAMA SISWA' && normalize(row[2]) === 'NISN' && normalize(row[3]) === 'NIS')
-  if (header < 0 || normalize(rows[header][4]).replaceAll(' ', '') !== 'EKSTRAKURIKULER') {
+  // Accept the common "kulikuler" spelling used in school spreadsheets too.
+  if (header < 0 || !['EKSTRAKURIKULER', 'EKSTRAKULIKULER'].includes(normalize(rows[header][4]).replaceAll(' ', ''))) {
     throw new Error('Gunakan format nilai ekstrakurikuler: NO, NAMA SISWA, NISN, NIS, dan kelompok Ekstra Kurikuler.')
   }
   const headers = rows[header + 1] ?? []

@@ -68,7 +68,9 @@ test('upload enforces authorization, semester and class before saving extracurri
     'next/cache': { revalidatePath() {} },
   }).uploadLedgerAction
   const book = xlsx.utils.book_new()
-  xlsx.utils.book_append_sheet(book, xlsx.utils.aoa_to_sheet(fixture().map(row => [...row.slice(0, 4), ...row.slice(18)])), 'Worksheet')
+  const uploadRows = fixture().map(row => [...row.slice(0, 4), ...row.slice(18)])
+  uploadRows[3][4] = 'ekstra kulikuler'
+  xlsx.utils.book_append_sheet(book, xlsx.utils.aoa_to_sheet(uploadRows), 'Worksheet')
   const form = new FormData()
   form.set('file', new File([xlsx.write(book, { type: 'buffer', bookType: 'xlsx' })], 'leger.xlsx'))
   form.set('classId', 'class'); form.set('semester', 'Genap 2025/2026'); form.set('category', 'ekstrakurikuler')
@@ -195,6 +197,21 @@ test('standalone extracurricular format reads merged headers, numeric NISN, blan
   assert.equal(result.rows[0].extracurriculars[1].predicate, 'SB')
   assert.equal(result.rows[0].subjects, undefined)
   assert.equal(result.rows[0].sakit, undefined)
+})
+
+test('standalone extracurricular format accepts header spelling and whitespace variants', () => {
+  for (const label of ['Ekstra Kurikuler', 'ekstrakurikuler', 'ekstra kulikuler', 'ekstrakulikuler', '  EKSTRA \t KULIKULER\n ']) {
+    const rows = fixture().map(row => [...row.slice(0, 4), ...row.slice(18)])
+    rows[3][4] = label
+    const book = xlsx.utils.book_new()
+    xlsx.utils.book_append_sheet(book, xlsx.utils.aoa_to_sheet(rows), 'Worksheet')
+    const result = load('extracurricular-excel').parseExtracurricularWorkbook(xlsx.write(book, { type: 'buffer', bookType: 'xlsx' }), catalog)
+    assert.equal(result.rows.length, 1, label)
+    assert.equal(result.rows[0].nisn, '0012345678', label)
+    assert.equal(result.rows[0].extracurriculars.length, 8, label)
+    assert.equal(result.rows[0].extracurriculars.find(item => item.code === 'BTQ').predicate, 'SB', label)
+    assert.equal(result.rows[0].extracurriculars[0].predicate, null, label)
+  }
 })
 
 test('standalone extracurricular format rejects invalid identities, columns and predicates', () => {
